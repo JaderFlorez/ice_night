@@ -514,3 +514,49 @@ export async function fetchAlertas(): Promise<AlertaStockDTO[]> {
   const json = await res.json();
   return json.data;
 }
+
+// ──────────────────────────────
+// Dashboard — tipos
+// ──────────────────────────────
+
+export interface DashboardHoyDTO {
+  ventas: {
+    total_sesiones: number;
+    sesiones_activas: number;
+    total_recaudado: number;
+  };
+  mesas: {
+    total: number;
+    activas: number;
+  };
+  alertas: number;
+}
+
+export interface TopProductoDTO {
+  variante_id: string;
+  sku: string;
+  producto_nombre: string;
+  variante_nombre: string;
+  total_vendido: number;
+  total_recaudado: number;
+}
+
+// ──────────────────────────────
+// Dashboard — funciones
+// ──────────────────────────────
+
+export async function fetchDashboardHoy(): Promise<DashboardHoyDTO> {
+  const headers = await getHeaders();
+  const res = await fetch(`${API_BASE}/dashboard/hoy`, { headers });
+  if (!res.ok) throw new Error('Error al obtener dashboard');
+  const json = await res.json();
+  return json.data;
+}
+
+export async function fetchTopProductos(): Promise<TopProductoDTO[]> {
+  const headers = await getHeaders();
+  const res = await fetch(`${API_BASE}/dashboard/top-productos`, { headers });
+  if (!res.ok) throw new Error('Error al obtener top productos');
+  const json = await res.json();
+  return json.data;
+}
