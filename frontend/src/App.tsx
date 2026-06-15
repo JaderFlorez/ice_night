@@ -5,6 +5,13 @@ import { RegisterPage } from './pages/auth/RegisterPage';
 import { PendingApprovalPage } from './pages/auth/PendingApprovalPage';
 import { UserManagementPage } from './pages/admin/UserManagementPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { CatalogPage } from './pages/catalogo/CatalogPage';
+import { ProductDetailPage } from './pages/catalogo/ProductDetailPage';
+import { MesasPage } from './pages/mesas/MesasPage';
+import { AbrirSesionPage } from './pages/sesiones/AbrirSesionPage';
+import { SesionPage } from './pages/sesiones/SesionPage';
+import { InventoryPage } from './pages/inventario/InventoryPage';
+import { ComprasPage } from './pages/inventario/ComprasPage';
 import { PublicRoute } from './components/auth/PublicRoute';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AdminRoute } from './components/auth/AdminRoute';
@@ -36,13 +43,20 @@ function App() {
                   </AdminRoute>
                 }
               />
+              <Route path="/mesas" element={<MesasPage />} />
+              <Route path="/mesas/nueva" element={<MesasPage />} />
+              <Route path="/mesas/:id/abrir" element={<AbrirSesionPage />} />
+              <Route path="/mesas/:id/sesion" element={<SesionPage />} />
+              <Route path="/catalogo" element={<CatalogPage />} />
+              <Route path="/catalogo/:id" element={<ProductDetailPage />} />
+              <Route path="/inventario" element={<InventoryPage />} />
               <Route
-                path="/mesas"
-                element={<div className="text-white p-8">Mesas — Próximamente</div>}
-              />
-              <Route
-                path="/catalogo"
-                element={<div className="text-white p-8">Catálogo — Próximamente</div>}
+                path="/inventario/compras"
+                element={
+                  <AdminRoute>
+                    <ComprasPage />
+                  </AdminRoute>
+                }
               />
             </Route>
           </Route>

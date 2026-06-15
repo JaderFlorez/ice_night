@@ -6,6 +6,7 @@ const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: '📊' },
   { path: '/mesas', label: 'Mesas', icon: '🪑' },
   { path: '/catalogo', label: 'Catálogo', icon: '📦' },
+  { path: '/inventario', label: 'Inventario', icon: '📋' },
 ];
 
 export function AppLayout() {
@@ -56,20 +57,36 @@ export function AppLayout() {
           ))}
 
           {isAdmin && (
-            <NavLink
-              to="/admin/usuarios"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
-                  isActive
-                    ? 'bg-purple-600/20 text-purple-300'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }`
-              }
-            >
-              <span>👥</span>
-              Admin
-            </NavLink>
+            <>
+              <NavLink
+                to="/admin/usuarios"
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
+                    isActive
+                      ? 'bg-purple-600/20 text-purple-300'
+                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                  }`
+                }
+              >
+                <span>👥</span>
+                Admin
+              </NavLink>
+              <NavLink
+                to="/inventario/compras"
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
+                    isActive
+                      ? 'bg-purple-600/20 text-purple-300'
+                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                  }`
+                }
+              >
+                <span>📦</span>
+                Compras
+              </NavLink>
+            </>
           )}
         </nav>
       </aside>

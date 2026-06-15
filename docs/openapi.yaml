@@ -1,0 +1,1491 @@
+openapi: 3.0.3
+info:
+  title: ICE NIGHT ERP API
+  description: |
+    API REST para gestión de discoteca — ventas, inventario, dashboard.
+    
+    Autenticación via Supabase Auth (frontend directo). El backend verifica 
+    JWTs usando `supabase.auth.getUser()` y chequea estado del usuario.
+    
+    Flujo de autenticación:
+      1. Frontend llama a `supabase.auth.signIn()` / `signUp()` directo
+      2. Supabase devuelve JWT
+      3. Frontend envía JWT en header `Authorization: Bearer <token>`
+      4. Backend verifica JWT via middleware `authMiddleware`
+      5. Backend verifica estado activo via `autorizacionMiddleware`
+  version: 0.1.0
+  contact:
+    name: ICE NIGHT Team
+
+servers:
+  - url: http://localhost:3000
+    description: Desarrollo local
+  - url: https://ice-night-erp.vercel.app
+    description: Producción (Vercel)
+
+paths:
+  # ──────────────────────────────────────────
+  # HEALTH
+  # ──────────────────────────────────────────
+  /api/health:
+    get:
+      summary: Health check
+      description: Verifica que el servidor esté funcionando. No requiere autenticación.
+      tags:
+        - Salud
+      responses:
+        '200':
+          description: Servidor funcionando correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  # ──────────────────────────────────────────
+  # AUTH
+  # ──────────────────────────────────────────
+  /api/auth/perfil:
+    get:
+      summary: Obtener perfil del usuario autenticado
+      description: |
+        Retorna el perfil completo desde `public.usuarios`.
+        No requiere `autorizacionMiddleware` — usuarios pendientes
+        necesitan este endpoint para consultar su estado.
+      tags:
+        - Auth
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Perfil del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+        '401':
+          description: Token requerido o inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Usuario no encontrado en public.usuarios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ──────────────────────────────────────────
+  # ADMIN — USUARIOS
+  # ──────────────────────────────────────────
+  /api/admin/usuarios/pendientes:
+    get:
+      summary: Listar usuarios pendientes de aprobación
+      description: |
+        Retorna todos los usuarios con `estado = 'pendiente'`.
+        Solo accesible por administradores activos.
+      tags:
+        - Admin
+        - Usuarios
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de usuarios pendientes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  usuarios:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UsuarioPendiente'
+        '401':
+          description: Token requerido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: No autorizado (no admin o no activo)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/admin/usuarios/{id}/estado:
+    patch:
+      summary: Aprobar o rechazar un usuario
+      description: |
+        Cambia el estado de un usuario a `activo` o `rechazado`.
+        Solo accesible por administradores activos.
+        Es idempotente — si el usuario ya tiene el estado solicitado,
+        retorna 200 sin errores.
+      tags:
+        - Admin
+        - Usuarios
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID del usuario
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - estado
+              properties:
+                estado:
+                  type: string
+                  description: Nuevo estado del usuario
+                  enum:
+                    - activo
+                    - rechazado
+      responses:
+        '200':
+          description: Estado actualizado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: Usuario actualizado
+        '400':
+          description: Estado inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Token requerido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: No autorizado (no admin)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ──────────────────────────────────────────
+  # PRODUCTOS (FUTURO)
+  # ──────────────────────────────────────────
+  /api/productos:
+    get:
+      summary: Listar productos
+      description: Retorna todos los productos activos del catálogo.
+      tags:
+        - Productos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de productos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  productos:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Producto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      summary: Crear producto
+      description: Crea un nuevo producto en el catálogo. Solo admin.
+      tags:
+        - Productos
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductoInput'
+      responses:
+        '201':
+          description: Producto creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/productos/{id}:
+    get:
+      summary: Obtener producto por ID
+      tags:
+        - Productos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      summary: Actualizar producto
+      tags:
+        - Productos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductoInput'
+      responses:
+        '200':
+          description: Producto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Desactivar producto (borrado lógico)
+      description: Marca el producto como `activo = false`. No elimina registros.
+      tags:
+        - Productos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Producto desactivado
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ──────────────────────────────────────────
+  # VARIANTES (FUTURO)
+  # ──────────────────────────────────────────
+  /api/productos/{productoId}/variantes:
+    get:
+      summary: Listar variantes de un producto
+      tags:
+        - Variantes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de variantes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  variantes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Variante'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      summary: Crear variante
+      tags:
+        - Variantes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVarianteInput'
+      responses:
+        '201':
+          description: Variante creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Variante'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/variantes/{id}:
+    put:
+      summary: Actualizar variante
+      tags:
+        - Variantes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVarianteInput'
+      responses:
+        '200':
+          description: Variante actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Variante'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Desactivar variante (borrado lógico)
+      tags:
+        - Variantes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Variante desactivada
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ──────────────────────────────────────────
+  # MESAS (FUTURO)
+  # ──────────────────────────────────────────
+  /api/mesas:
+    get:
+      summary: Listar mesas
+      tags:
+        - Mesas
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de mesas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mesas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Mesa'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      summary: Crear mesa
+      tags:
+        - Mesas
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMesaInput'
+      responses:
+        '201':
+          description: Mesa creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mesa'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/mesas/{id}:
+    put:
+      summary: Actualizar mesa
+      tags:
+        - Mesas
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMesaInput'
+      responses:
+        '200':
+          description: Mesa actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mesa'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ──────────────────────────────────────────
+  # SESIONES (FUTURO)
+  # ──────────────────────────────────────────
+  /api/mesas/{mesaId}/abrir:
+    post:
+      summary: Abrir sesión en una mesa
+      description: |
+        Crea una nueva sesión con estado `abierta` para la mesa.
+        La mesa NO puede tener otra sesión abierta (enforced por
+        índice único parcial `idx_sesion_mesa_abierta`).
+      tags:
+        - Sesiones
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: mesaId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Sesión creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sesion'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: La mesa ya tiene una sesión abierta
+
+  /api/sesiones/{id}:
+    get:
+      summary: Obtener sesión con sus items
+      tags:
+        - Sesiones
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Sesión encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SesionConItems'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/sesiones/{id}/items:
+    post:
+      summary: Agregar consumo a una sesión
+      description: |
+        Agrega un item a la sesión abierta. El precio se congela
+        al valor actual de la variante (snapshot).
+      tags:
+        - Sesiones
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgregarConsumoInput'
+      responses:
+        '201':
+          description: Consumo agregado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemSesion'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: La sesión ya está cerrada
+
+  /api/sesiones/{id}/cerrar:
+    post:
+      summary: Cerrar sesión (cobrar cuenta)
+      description: |
+        Cierra la sesión, descuenta stock de todas las variantes
+        involucradas (transaccional, con `SELECT FOR UPDATE`),
+        y registra movimientos de stock.
+      tags:
+        - Sesiones
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metodo_pago:
+                  type: string
+                  enum:
+                    - efectivo
+                    - tarjeta
+                    - transferencia
+      responses:
+        '200':
+          description: Sesión cerrada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: Sesión cerrada
+                  total:
+                    type: number
+                    example: 1250.00
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Stock insuficiente para completar la venta
+
+  /api/sesiones/abiertas:
+    get:
+      summary: Listar sesiones abiertas
+      tags:
+        - Sesiones
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de sesiones abiertas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sesiones:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Sesion'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ──────────────────────────────────────────
+  # COMPRAS / INVENTARIO (FUTURO)
+  # ──────────────────────────────────────────
+  /api/compras:
+    get:
+      summary: Listar compras
+      tags:
+        - Inventario
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de compras
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  compras:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Compra'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      summary: Registrar compra
+      description: |
+        Registra una compra de inventario. Aumenta el stock
+        de cada variante y crea movimientos de stock tipo `compra`.
+        Todo en una transacción.
+      tags:
+        - Inventario
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrarCompraInput'
+      responses:
+        '201':
+          description: Compra registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Compra'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/alertas-stock:
+    get:
+      summary: Obtener alertas de stock bajo
+      description: Retorna variantes donde `stock <= stock_minimo`.
+      tags:
+        - Inventario
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Alertas de stock
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alertas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AlertaStock'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ──────────────────────────────────────────
+  # DASHBOARD (FUTURO)
+  # ──────────────────────────────────────────
+  /api/dashboard/hoy:
+    get:
+      summary: Dashboard del día actual
+      description: KPIs del día: ventas totales, ganancia, promedio por mesa, etc.
+      tags:
+        - Dashboard
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: KPIs del día
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardDiario'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/dashboard/top-productos:
+    get:
+      summary: Top productos más vendidos
+      parameters:
+        - name: limite
+          in: query
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+      tags:
+        - Dashboard
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Top de productos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  top:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TopProducto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT obtenido de Supabase Auth via `supabase.auth.signIn()`.
+        Enviar en header: `Authorization: Bearer <token>`
+
+  schemas:
+    # ── Response básicos ──
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Mensaje de error descriptivo
+      required:
+        - error
+
+    # ── Auth / Usuarios ──
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        nombre:
+          type: string
+        rol:
+          type: string
+          enum:
+            - admin
+            - mesero
+        estado:
+          type: string
+          enum:
+            - pendiente
+            - activo
+            - rechazado
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - nombre
+        - rol
+        - estado
+
+    UsuarioPendiente:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        nombre:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - nombre
+
+    # ── Productos ──
+    Producto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nombre:
+          type: string
+          example: Michelada
+        descripcion:
+          type: string
+          example: Michelada preparada con clamato y salsa picante
+        categoria:
+          type: string
+          enum:
+            - cerveza
+            - michelada
+            - soda
+            - snack
+            - otro
+        tiene_variantes:
+          type: boolean
+          description: Si es true, requiere seleccionar variante para vender
+        activo:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - nombre
+        - categoria
+        - tiene_variantes
+        - activo
+
+    CreateProductoInput:
+      type: object
+      required:
+        - nombre
+        - categoria
+      properties:
+        nombre:
+          type: string
+          example: Michelada
+        descripcion:
+          type: string
+        categoria:
+          type: string
+          enum:
+            - cerveza
+            - michelada
+            - soda
+            - snack
+            - otro
+        tiene_variantes:
+          type: boolean
+          default: false
+
+    UpdateProductoInput:
+      type: object
+      properties:
+        nombre:
+          type: string
+        descripcion:
+          type: string
+        categoria:
+          type: string
+          enum:
+            - cerveza
+            - michelada
+            - soda
+            - snack
+            - otro
+        tiene_variantes:
+          type: boolean
+        activo:
+          type: boolean
+
+    # ── Variantes ──
+    Variante:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        producto_id:
+          type: string
+          format: uuid
+        nombre:
+          type: string
+          example: Tamarindo
+        sku:
+          type: string
+          example: MIC-TAM-001
+        precio:
+          type: number
+          format: float
+          example: 85.00
+        costo:
+          type: number
+          format: float
+          example: 35.00
+        stock:
+          type: integer
+          example: 50
+        stock_minimo:
+          type: integer
+          example: 10
+        activa:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - producto_id
+        - nombre
+        - sku
+        - precio
+        - costo
+        - stock
+        - stock_minimo
+        - activa
+
+    CreateVarianteInput:
+      type: object
+      required:
+        - nombre
+        - sku
+        - precio
+        - costo
+      properties:
+        nombre:
+          type: string
+        sku:
+          type: string
+        precio:
+          type: number
+          format: float
+          minimum: 0
+        costo:
+          type: number
+          format: float
+          minimum: 0
+        stock:
+          type: integer
+          minimum: 0
+          default: 0
+        stock_minimo:
+          type: integer
+          minimum: 0
+          default: 5
+
+    UpdateVarianteInput:
+      type: object
+      properties:
+        nombre:
+          type: string
+        sku:
+          type: string
+        precio:
+          type: number
+          format: float
+          minimum: 0
+        costo:
+          type: number
+          format: float
+          minimum: 0
+        stock:
+          type: integer
+          minimum: 0
+        stock_minimo:
+          type: integer
+          minimum: 0
+        activa:
+          type: boolean
+
+    # ── Mesas ──
+    Mesa:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        numero:
+          type: integer
+          example: 1
+        capacidad:
+          type: integer
+          example: 4
+        ubicacion:
+          type: string
+          example: VIP
+        activa:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - numero
+        - capacidad
+        - activa
+
+    CreateMesaInput:
+      type: object
+      required:
+        - numero
+        - capacidad
+      properties:
+        numero:
+          type: integer
+          minimum: 1
+        capacidad:
+          type: integer
+          minimum: 1
+        ubicacion:
+          type: string
+
+    UpdateMesaInput:
+      type: object
+      properties:
+        numero:
+          type: integer
+          minimum: 1
+        capacidad:
+          type: integer
+          minimum: 1
+        ubicacion:
+          type: string
+        activa:
+          type: boolean
+
+    # ── Sesiones ──
+    Sesion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        mesa_id:
+          type: string
+          format: uuid
+        mesero_id:
+          type: string
+          format: uuid
+        estado:
+          type: string
+          enum:
+            - abierta
+            - cerrada
+        abierta_en:
+          type: string
+          format: date-time
+        cerrada_en:
+          type: string
+          format: date-time
+          nullable: true
+        metodo_pago:
+          type: string
+          enum:
+            - efectivo
+            - tarjeta
+            - transferencia
+          nullable: true
+        total:
+          type: number
+          format: float
+          nullable: true
+      required:
+        - id
+        - mesa_id
+        - mesero_id
+        - estado
+        - abierta_en
+
+    SesionConItems:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Sesion'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/ItemSesion'
+            mesa_numero:
+              type: integer
+            mesero_nombre:
+              type: string
+
+    ItemSesion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sesion_id:
+          type: string
+          format: uuid
+        variante_id:
+          type: string
+          format: uuid
+        cantidad:
+          type: integer
+          minimum: 1
+        precio_unitario:
+          type: number
+          format: float
+          description: Precio al momento de agregar el consumo (snapshot)
+        subtotal:
+          type: number
+          format: float
+        creado_en:
+          type: string
+          format: date-time
+      required:
+        - id
+        - sesion_id
+        - variante_id
+        - cantidad
+        - precio_unitario
+        - subtotal
+
+    AgregarConsumoInput:
+      type: object
+      required:
+        - variante_id
+        - cantidad
+      properties:
+        variante_id:
+          type: string
+          format: uuid
+        cantidad:
+          type: integer
+          minimum: 1
+          example: 2
+
+    # ── Compras / Inventario ──
+    Compra:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        proveedor:
+          type: string
+          nullable: true
+        notas:
+          type: string
+        costo_total:
+          type: number
+          format: float
+        creado_en:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemCompra'
+      required:
+        - id
+        - costo_total
+        - creado_en
+
+    ItemCompra:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        compra_id:
+          type: string
+          format: uuid
+        variante_id:
+          type: string
+          format: uuid
+        cantidad:
+          type: integer
+          minimum: 1
+        costo_unitario:
+          type: number
+          format: float
+        subtotal:
+          type: number
+          format: float
+      required:
+        - id
+        - compra_id
+        - variante_id
+        - cantidad
+        - costo_unitario
+        - subtotal
+
+    RegistrarCompraInput:
+      type: object
+      required:
+        - items
+      properties:
+        proveedor:
+          type: string
+          example: Distribuidora del Sur
+        notas:
+          type: string
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              - variante_id
+              - cantidad
+              - costo_unitario
+            properties:
+              variante_id:
+                type: string
+                format: uuid
+              cantidad:
+                type: integer
+                minimum: 1
+              costo_unitario:
+                type: number
+                format: float
+                minimum: 0
+
+    MovimientoStock:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        variante_id:
+          type: string
+          format: uuid
+        cantidad:
+          type: integer
+          description: Positivo = entrada, negativo = salida
+        tipo:
+          type: string
+          enum:
+            - compra
+            - venta
+            - ajuste
+        referencia_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID de la compra o sesión que originó el movimiento
+        creado_en:
+          type: string
+          format: date-time
+      required:
+        - id
+        - variante_id
+        - cantidad
+        - tipo
+
+    AlertaStock:
+      type: object
+      properties:
+        variante_id:
+          type: string
+          format: uuid
+        nombre:
+          type: string
+          example: Corona Familiar
+        sku:
+          type: string
+          example: CER-COR-001
+        stock:
+          type: integer
+          example: 3
+        stock_minimo:
+          type: integer
+          example: 10
+        producto_nombre:
+          type: string
+          example: Cerveza
+
+    # ── Dashboard ──
+    DashboardDiario:
+      type: object
+      properties:
+        fecha:
+          type: string
+          format: date
+        ventas_totales:
+          type: number
+          format: float
+          example: 15250.00
+        ganancia_total:
+          type: number
+          format: float
+          example: 7650.00
+        promedio_por_mesa:
+          type: number
+          format: float
+          example: 1906.25
+        sesiones_cerradas:
+          type: integer
+          example: 8
+        sesiones_abiertas:
+          type: integer
+          example: 2
+        productos_vendidos:
+          type: integer
+          example: 47
+
+    TopProducto:
+      type: object
+      properties:
+        producto_nombre:
+          type: string
+          example: Michelada
+        variante_nombre:
+          type: string
+          example: Tamarindo
+        cantidad_vendida:
+          type: integer
+          example: 15
+        total_venta:
+          type: number
+          format: float
+          example: 1275.00
+
+  # ── Responses reutilizables ──
+  responses:
+    Unauthorized:
+      description: Token requerido o inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: No autorizado (permisos insuficientes)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Datos de entrada inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+tags:
+  - name: Salud
+    description: Health check del servidor
+  - name: Auth
+    description: Autenticación y perfil de usuario
+  - name: Admin
+    description: Endpoints de administración
+  - name: Usuarios
+    description: Gestión de usuarios
+  - name: Productos
+    description: Catálogo de productos
+  - name: Variantes
+    description: Variantes de productos
+  - name: Mesas
+    description: Gestión de mesas
+  - name: Sesiones
+    description: Sesiones de venta (cuentas abiertas/cerradas)
+  - name: Inventario
+    description: Compras, movimientos de stock y alertas
+  - name: Dashboard
+    description: KPIs y reportes del negocio
