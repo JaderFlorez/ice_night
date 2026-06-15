@@ -1,0 +1,12 @@
+{
+  "buildCommand": "cd backend && npm run build",
+  "outputDirectory": "backend/dist",
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api" }
+  ]
+}

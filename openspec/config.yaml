@@ -1,0 +1,74 @@
+# openspec/config.yaml
+schema: spec-driven
+
+context: |
+  Project: ICE NIGHT — ERP para discoteca/nightclub
+  Runtime: Node + TypeScript (module: nodenext, strict: true)
+  HTTP: Fastify (serverless on Vercel)
+  Database: Supabase Postgres (pg direct pool + RLS policies)
+  Auth: Supabase Auth (frontend direct, JWT verification on Fastify)
+  Validation: Zod
+  Frontend: React + Vite + Tailwind CSS
+  Backend tests: Jest + Supertest (app.inject)
+  Frontend tests: Vitest + React Testing Library
+  Deployment: Vercel (frontend + backend: @fastify/aws-lambda)
+  Architecture: Clean Architecture (Repository + Use Case patterns)
+  Domain language: Spanish (entities, errors, use cases)
+
+rules:
+  proposal:
+    - Include rollback plan for changes touching auth or billing
+    - Always state risk level (low/medium/high)
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+    - Always show repository interface before implementation
+  tasks:
+    - Group by layer: domain, application, infrastructure, presentation
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing code patterns
+    tdd: false
+    test_command: "npm test -- --passWithNoTests"
+  verify:
+    test_command: "npm test"
+    build_command: "npm run build"
+    coverage_threshold: 80
+  archive:
+    - Warn before merging destructive deltas
+
+testing:
+  strict_tdd: false
+  note: "Backend tests operational (Jest + app.inject). Frontend Vitest setup present (setup-only, no test runner integration tests yet). Strict TDD disabled — apply without pre-written tests."
+  layers:
+    unit:
+      available: true
+      tool: "Jest (backend) / Vitest (frontend)"
+    integration:
+      available: true
+      tool: "app.inject (backend) / React Testing Library (frontend)"
+    e2e:
+      available: false
+      planned_tool: "TBD"
+  coverage:
+    available: false
+    planned_command: "jest --coverage (backend) / vitest --coverage (frontend)"
+  quality:
+    linter:
+      available: false
+      planned: "ESLint"
+    type_checker:
+      available: true
+      tool: "TypeScript (strict mode)"
+    formatter:
+      available: false
+      planned: "Prettier"
+
+session:
+  execution_mode: interactive
+  artifact_store: openspec
+  chained_pr_strategy: ask-always
+  review_budget: 400
