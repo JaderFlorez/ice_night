@@ -1,9 +1,9 @@
 import { Usuario } from './usuario.js';
-import { Producto } from './producto.js';
+import { Producto, ProductoConVariantes } from './producto.js';
 import { Variante } from './variante.js';
 import { Mesa } from './mesa.js';
 import { Sesion, ItemSesion } from './sesion.js';
-import { Compra, ItemCompra } from './compra.js';
+import { Compra, CompraConItems } from './compra.js';
 import { MovimientoStock } from './movimiento-stock.js';
 
 export interface UsuarioRepositorio {
@@ -15,10 +15,10 @@ export interface UsuarioRepositorio {
 }
 
 export interface ProductoRepositorio {
-  findAll(): Promise<Producto[]>;
-  findById(id: string): Promise<Producto | null>;
+  findAll(q?: string, categoria?: string): Promise<ProductoConVariantes[]>;
+  findById(id: string): Promise<ProductoConVariantes | null>;
   save(producto: Producto): Promise<void>;
-  update(producto: Producto): Promise<void>;
+  update(id: string, data: Partial<Producto>): Promise<void>;
   delete(id: string): Promise<void>;
 }
 
@@ -26,20 +26,24 @@ export interface VarianteRepositorio {
   findByProducto(productoId: string): Promise<Variante[]>;
   findById(id: string): Promise<Variante | null>;
   save(variante: Variante): Promise<void>;
-  update(variante: Variante): Promise<void>;
+  update(id: string, data: Partial<Variante>): Promise<void>;
   updateStock(id: string, cantidad: number): Promise<void>;
+  delete(id: string): Promise<void>;
 }
 
 export interface MesaRepositorio {
   findAll(): Promise<Mesa[]>;
   findById(id: string): Promise<Mesa | null>;
+  findByNumero(numero: number): Promise<Mesa | null>;
   save(mesa: Mesa): Promise<void>;
+  update(id: string, data: Partial<Mesa>): Promise<void>;
   updateEstado(id: string, activa: boolean): Promise<void>;
 }
 
 export interface SesionRepositorio {
   findById(id: string): Promise<Sesion | null>;
   findByMesaAbierta(mesaId: string): Promise<Sesion | null>;
+  findActivas(): Promise<Sesion[]>;
   save(sesion: Sesion): Promise<void>;
   update(sesion: Sesion): Promise<void>;
   cerrar(
@@ -56,9 +60,9 @@ export interface ItemSesionRepositorio {
 }
 
 export interface CompraRepositorio {
-  findAll(): Promise<Compra[]>;
-  findById(id: string): Promise<Compra | null>;
-  save(compra: Compra): Promise<void>;
+  findAll(): Promise<CompraConItems[]>;
+  findById(id: string): Promise<CompraConItems | null>;
+  save(compra: Compra): Promise<string>;
 }
 
 export interface MovimientoStockRepositorio {

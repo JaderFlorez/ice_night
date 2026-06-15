@@ -20,8 +20,13 @@ export const CrearProductoSchema = z.object({
   descripcion: z.string().optional(),
   categoria: z.enum(['cerveza', 'michelada', 'soda', 'snack', 'otro']),
   tiene_variantes: z.boolean().default(false),
+  precio: z.number().positive('Precio debe ser positivo').optional(),
+  stock: z.number().int().min(0).default(0).optional(),
 });
 export type CrearProductoDTO = z.infer<typeof CrearProductoSchema>;
+
+export const ActualizarProductoSchema = CrearProductoSchema.partial();
+export type ActualizarProductoDTO = z.infer<typeof ActualizarProductoSchema>;
 
 export const CrearVarianteSchema = z.object({
   producto_id: z.string().uuid(),
@@ -34,6 +39,9 @@ export const CrearVarianteSchema = z.object({
 });
 export type CrearVarianteDTO = z.infer<typeof CrearVarianteSchema>;
 
+export const ActualizarVarianteSchema = CrearVarianteSchema.omit({ producto_id: true }).partial();
+export type ActualizarVarianteDTO = z.infer<typeof ActualizarVarianteSchema>;
+
 // ─── Mesas ───
 export const CrearMesaSchema = z.object({
   numero: z.number().int().positive(),
@@ -41,6 +49,9 @@ export const CrearMesaSchema = z.object({
   ubicacion: z.string().optional(),
 });
 export type CrearMesaDTO = z.infer<typeof CrearMesaSchema>;
+
+export const ActualizarMesaSchema = CrearMesaSchema.partial();
+export type ActualizarMesaDTO = z.infer<typeof ActualizarMesaSchema>;
 
 // ─── Sesiones ───
 export const AgregarItemSchema = z.object({

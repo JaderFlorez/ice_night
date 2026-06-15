@@ -14,3 +14,7 @@ export interface ItemCompra {
   costo_unitario: number;
   subtotal: number;
 }
+
+export interface CompraConItems extends Compra {
+  items: ItemCompra[];
+}

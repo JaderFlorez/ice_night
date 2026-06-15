@@ -25,6 +25,12 @@ export class StockInsuficiente extends ErrorDeDominio {
   }
 }
 
+export class MesaNoEncontrada extends ErrorDeDominio {
+  constructor() {
+    super('Mesa no encontrada');
+  }
+}
+
 export class SesionNoEncontrada extends ErrorDeDominio {
   constructor() {
     super('Sesión no encontrada');
@@ -54,5 +60,17 @@ export class UsuarioNoActivo extends ErrorDeDominio {
 export class VarianteNoEncontrada extends ErrorDeDominio {
   constructor() {
     super('Variante no encontrada');
+  }
+}
+
+export class ProductoNoEncontrado extends ErrorDeDominio {
+  constructor() {
+    super('Producto no encontrado');
+  }
+}
+
+export class CompraNoEncontrada extends ErrorDeDominio {
+  constructor() {
+    super('Compra no encontrada');
   }
 }

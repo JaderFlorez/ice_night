@@ -14,3 +14,7 @@ export interface Producto {
   activo: boolean;
   created_at: string;
 }
+
+export interface ProductoConVariantes extends Producto {
+  variantes: import('./variante.js').Variante[];
+}
