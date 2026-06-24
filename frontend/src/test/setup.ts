@@ -1,8 +1,5 @@
 import '@testing-library/jest-dom';
-import { setupServer } from 'msw/node';
-import { handlers } from './msw/handlers';
-
-const server = setupServer(...handlers);
+import { server } from './msw/server';
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
 afterEach(() => server.resetHandlers());

@@ -8,6 +8,7 @@ import {
   type TopProductoDTO,
 } from '../lib/api';
 import { AlertasStock } from '../components/inventario/AlertasStock';
+import { SalesHistorySection } from '../components/dashboard/SalesHistorySection';
 
 export function DashboardPage() {
   const { perfil } = useAuth();
@@ -195,6 +196,9 @@ export function DashboardPage() {
           <AlertasStock />
         </div>
       </div>
+
+      {/* Sales History Section */}
+      <SalesHistorySection />
 
       {/* Quick links */}
       <div className="bg-gray-800 rounded-xl p-6">
