@@ -5,6 +5,7 @@ import { adminMiddleware } from '../middleware/admin.js';
 import {
   dashboardHoyHandler,
   topProductosHandler,
+  historialVentasHandler,
 } from '../controladores/dashboard.js';
 
 const admin = [authMiddleware, autorizacionMiddleware, adminMiddleware];
@@ -20,5 +21,11 @@ export async function registrarRutasDashboard(app: FastifyInstance) {
     '/api/dashboard/top-productos',
     { preHandler: admin },
     topProductosHandler,
+  );
+
+  app.get(
+    '/api/dashboard/historial-ventas',
+    { preHandler: admin },
+    historialVentasHandler,
   );
 }

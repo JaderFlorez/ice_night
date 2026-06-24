@@ -423,6 +423,19 @@ export async function obtenerCuenta(sesionId: string): Promise<CuentaDTO> {
   return json.data;
 }
 
+export async function eliminarConsumo(sesionId: string, itemId: string): Promise<void> {
+  const headers = await getHeaders();
+  const res = await fetch(`${API_BASE}/sesiones/${sesionId}/items/${itemId}`, {
+    method: 'DELETE',
+    headers,
+    body: JSON.stringify({}),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Error al eliminar consumo' }));
+    throw new Error(err.error || 'Error al eliminar consumo');
+  }
+}
+
 // ──────────────────────────────
 // Inventario — tipos
 // ──────────────────────────────
@@ -550,6 +563,20 @@ export interface TopProductoDTO {
   total_recaudado: number;
 }
 
+export interface HistorialVentaDetalleDTO {
+  fecha: string;
+  sesiones: number;
+  total: number;
+}
+
+export interface HistorialVentasDTO {
+  periodo: string;
+  total_sesiones: number;
+  total_recaudado: number;
+  productos_vendidos: number;
+  desglose: HistorialVentaDetalleDTO[];
+}
+
 // ──────────────────────────────
 // Dashboard — funciones
 // ──────────────────────────────
@@ -566,6 +593,24 @@ export async function fetchTopProductos(): Promise<TopProductoDTO[]> {
   const headers = await getHeaders();
   const res = await fetch(`${API_BASE}/dashboard/top-productos`, { headers });
   if (!res.ok) throw new Error('Error al obtener top productos');
+  const json = await res.json();
+  return json.data;
+}
+
+export async function fetchHistorialVentas(
+  periodo: string,
+): Promise<HistorialVentasDTO> {
+  const headers = await getHeaders();
+  const res = await fetch(
+    `${API_BASE}/dashboard/historial-ventas?periodo=${encodeURIComponent(periodo)}`,
+    { headers },
+  );
+  if (!res.ok) {
+    const err = await res
+      .json()
+      .catch(() => ({ error: 'Error al obtener historial de ventas' }));
+    throw new Error(err.error || 'Error al obtener historial de ventas');
+  }
   const json = await res.json();
   return json.data;
 }
