@@ -1,7 +1,6 @@
 import { type ReactNode } from 'react';
 import { render, type RenderOptions } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { vi } from 'vitest';
 import type { UsuarioDTO } from '../lib/api';
 
 // ─── Factory helpers (pure data, no vi.mock) ───

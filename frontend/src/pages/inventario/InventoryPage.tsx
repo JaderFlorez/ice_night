@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertasStock } from '../../components/inventario/AlertasStock';
+import { TablaStock } from '../../components/inventario/TablaStock';
 import {
   fetchMovimientos,
   type MovimientoStockDTO,
@@ -33,6 +34,8 @@ export function InventoryPage() {
   return (
     <div>
       <h2 className="text-2xl font-bold text-white mb-6">Inventario</h2>
+
+      <TablaStock />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left column: Alertas */}
