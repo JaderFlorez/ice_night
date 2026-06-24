@@ -178,8 +178,12 @@ export async function eliminarProducto(id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/productos/${id}`, {
     method: 'DELETE',
     headers,
+    body: JSON.stringify({}),
   });
-  if (!res.ok) throw new Error('Error al eliminar producto');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Error al eliminar producto' }));
+    throw new Error(err.error || 'Error al eliminar producto');
+  }
 }
 
 export async function fetchNextSku(categoria: string): Promise<{ sku: string }> {
@@ -233,8 +237,12 @@ export async function eliminarVariante(id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/variantes/${id}`, {
     method: 'DELETE',
     headers,
+    body: JSON.stringify({}),
   });
-  if (!res.ok) throw new Error('Error al eliminar variante');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Error al eliminar variante' }));
+    throw new Error(err.error || 'Error al eliminar variante');
+  }
 }
 
 // ──────────────────────────────
@@ -340,6 +348,7 @@ export async function eliminarMesa(id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/mesas/${id}`, {
     method: 'DELETE',
     headers,
+    body: JSON.stringify({}),
   });
   if (!res.ok) throw new Error('Error al eliminar mesa');
 }
