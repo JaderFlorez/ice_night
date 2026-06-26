@@ -1,4 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
+import { ZodError } from 'zod';
 import { MesaRepositorioImpl } from '../../infraestructura/repositorios/mesa-repositorio.js';
 import { ListarMesas } from '../../core/aplicacion/mesas/ListarMesas.js';
 import { CrearMesa } from '../../core/aplicacion/mesas/CrearMesa.js';
@@ -34,6 +35,15 @@ export async function crearMesaHandler(
     const mesa = await crearMesa.ejecutar(body);
     return reply.status(201).send({ data: mesa });
   } catch (error) {
+    if (error instanceof ZodError) {
+      return reply.status(400).send({
+        error: 'Datos inválidos',
+        detalles: error.errors.map((e) => ({
+          campo: e.path.join('.'),
+          mensaje: e.message,
+        })),
+      });
+    }
     if (error instanceof ErrorDeDominio) {
       return reply.status(409).send({ error: error.message });
     }
@@ -46,11 +56,20 @@ export async function actualizarMesaHandler(
   reply: FastifyReply,
 ) {
   const { id } = request.params as { id: string };
-  const body = ActualizarMesaSchema.parse(request.body);
   try {
+    const body = ActualizarMesaSchema.parse(request.body);
     await actualizarMesa.ejecutar(id, body);
     return reply.send({ mensaje: 'Mesa actualizada correctamente' });
   } catch (error) {
+    if (error instanceof ZodError) {
+      return reply.status(400).send({
+        error: 'Datos inválidos',
+        detalles: error.errors.map((e) => ({
+          campo: e.path.join('.'),
+          mensaje: e.message,
+        })),
+      });
+    }
     if (error instanceof MesaNoEncontrada) {
       return reply.status(404).send({ error: error.message });
     }

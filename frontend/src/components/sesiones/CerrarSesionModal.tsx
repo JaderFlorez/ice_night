@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   cerrarSesion,
+  formatCOP,
   type MetodoPago,
 } from '../../lib/api';
 
@@ -60,7 +61,7 @@ export function CerrarSesionModal({
         <div className="bg-gray-800 rounded-lg px-4 py-3 mb-4">
           <p className="text-sm text-gray-400 mb-1">Total a cobrar</p>
           <p className="text-2xl font-bold text-white">
-            ${Number(total).toFixed(2)}
+            {formatCOP(total)}
           </p>
         </div>
 

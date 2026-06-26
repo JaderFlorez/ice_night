@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchHistorialVentas, type HistorialVentasDTO } from '../../lib/api';
+import { fetchHistorialVentas, formatCOP, type HistorialVentasDTO } from '../../lib/api';
 
 type Periodo = 'day' | 'week' | 'month' | 'year';
 
@@ -87,7 +87,7 @@ export function SalesHistorySection() {
                 Total recaudado
               </p>
               <p className="text-2xl font-bold text-green-400">
-                ${Number(data.total_recaudado).toFixed(2)}
+                {formatCOP(data.total_recaudado)}
               </p>
             </div>
             <div className="bg-gray-700/50 rounded-lg p-4">
@@ -124,7 +124,7 @@ export function SalesHistorySection() {
                       <td className="py-3">{d.fecha}</td>
                       <td className="py-3 text-right">{d.sesiones}</td>
                       <td className="py-3 text-right">
-                        ${Number(d.total).toFixed(2)}
+                        {formatCOP(d.total)}
                       </td>
                     </tr>
                   ))}

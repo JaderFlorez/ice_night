@@ -33,7 +33,7 @@ describe('SalesHistorySection', () => {
 
     // KPI values (day mock: total_sesiones=8, total_recaudado=245000, productos_vendidos=34)
     expect(screen.getByText('8')).toBeInTheDocument();
-    expect(screen.getByText('$245000.00')).toBeInTheDocument();
+    expect(screen.getByText(/245\.000/)).toBeInTheDocument();
     expect(screen.getByText('34')).toBeInTheDocument();
   });
 
@@ -68,7 +68,7 @@ describe('SalesHistorySection', () => {
 
     // Week mock: total_sesiones=45, total_recaudado=1250000
     await waitFor(() => {
-      expect(screen.getByText('$1250000.00')).toBeInTheDocument();
+      expect(screen.getByText(/1\.250\.000/)).toBeInTheDocument();
     });
 
     expect(screen.getByText('45')).toBeInTheDocument();
@@ -95,7 +95,7 @@ describe('SalesHistorySection', () => {
     await user.click(screen.getByText('Mes'));
 
     await waitFor(() => {
-      expect(screen.getByText('$5200000.00')).toBeInTheDocument();
+      expect(screen.getByText(/5\.200\.000/)).toBeInTheDocument();
     });
 
     expect(screen.getByText('180')).toBeInTheDocument();
@@ -109,7 +109,7 @@ describe('SalesHistorySection', () => {
     await user.click(screen.getByText('Año'));
 
     await waitFor(() => {
-      expect(screen.getByText('$58000000.00')).toBeInTheDocument();
+      expect(screen.getByText(/58\.000\.000/)).toBeInTheDocument();
     });
 
     expect(screen.getByText('2100')).toBeInTheDocument();

@@ -7,6 +7,7 @@ import {
   obtenerCuenta,
   agregarConsumo,
   fetchProductos,
+  formatCOP,
   type MesaDTO,
   type SesionDTO,
   type CuentaDTO,
@@ -245,7 +246,7 @@ export function SesionPage() {
             <div className="bg-gray-900 rounded-lg p-6 mb-6">
               <p className="text-sm text-gray-400 mb-1">Total</p>
               <p className="text-3xl font-bold text-white">
-                ${Number(total).toFixed(2)}
+                {formatCOP(total)}
               </p>
             </div>
 
@@ -376,10 +377,10 @@ export function SesionPage() {
                     <td className="py-3">{item.variante_id}</td>
                     <td className="py-3 text-right">{item.cantidad}</td>
                     <td className="py-3 text-right">
-                      ${Number(item.precio_unitario).toFixed(2)}
+                      {formatCOP(item.precio_unitario)}
                     </td>
                     <td className="py-3 text-right">
-                      ${Number(item.subtotal).toFixed(2)}
+                      {formatCOP(item.subtotal)}
                     </td>
                   </tr>
                 ))}
@@ -450,7 +451,7 @@ export function SesionPage() {
                             </span>
                             {v.precio != null && (
                               <span className="text-gray-500 ml-auto">
-                                ${Number(v.precio).toFixed(2)}
+                                {formatCOP(v.precio)}
                               </span>
                             )}
                           </button>
@@ -491,7 +492,7 @@ export function SesionPage() {
           <div>
             <p className="text-sm text-gray-400">Total</p>
             <p className="text-3xl font-bold text-white">
-              ${Number(total).toFixed(2)}
+              {formatCOP(total)}
             </p>
           </div>
 

@@ -3,6 +3,7 @@ import { useIsAdmin } from '../../context/AuthContext';
 import {
   fetchCompras,
   fetchProductos,
+  formatCOP,
   type CompraDTO,
 } from '../../lib/api';
 import { RegistrarCompraModal } from '../../components/inventario/RegistrarCompraModal';
@@ -146,7 +147,7 @@ export function ComprasPage() {
                             {totalItems(compra) !== 1 ? 's' : ''}
                           </div>
                           <div className="flex-1 text-sm text-white font-medium text-right">
-                            ${Number(compra.costo_total).toFixed(2)}
+                            {formatCOP(compra.costo_total)}
                           </div>
                           <div className="w-8 text-center text-gray-500 text-xs shrink-0">
                             {isExpanded ? '▲' : '▼'}
@@ -192,10 +193,10 @@ export function ComprasPage() {
                                       {item.cantidad}
                                     </td>
                                     <td className="py-1.5 text-right">
-                                      ${Number(item.costo_unitario).toFixed(2)}
+                                      {formatCOP(item.costo_unitario)}
                                     </td>
                                     <td className="py-1.5 text-right">
-                                      ${Number(item.subtotal).toFixed(2)}
+                                      {formatCOP(item.subtotal)}
                                     </td>
                                   </tr>
                                 ))}

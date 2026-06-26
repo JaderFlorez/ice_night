@@ -4,6 +4,7 @@ import { useAuth, useIsAdmin } from '../context/AuthContext';
 import {
   fetchDashboardHoy,
   fetchTopProductos,
+  formatCOP,
   type DashboardHoyDTO,
   type TopProductoDTO,
 } from '../lib/api';
@@ -75,7 +76,7 @@ export function DashboardPage() {
             Total recaudado hoy
           </p>
           <p className="text-2xl font-bold text-green-400">
-            ${Number(dashboardHoy?.ventas.total_recaudado ?? 0).toFixed(2)}
+            {formatCOP(dashboardHoy?.ventas.total_recaudado ?? 0)}
           </p>
           <p className="text-gray-500 text-xs mt-1">
             {dashboardHoy?.ventas.total_sesiones ?? 0} sesiones
@@ -172,7 +173,7 @@ export function DashboardPage() {
                       </td>
                       <td className="py-3 text-right">{p.total_vendido}</td>
                       <td className="py-3 text-right">
-                        ${Number(p.total_recaudado).toFixed(2)}
+                        {formatCOP(p.total_recaudado)}
                       </td>
                     </tr>
                   ))}

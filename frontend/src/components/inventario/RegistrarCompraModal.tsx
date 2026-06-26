@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import {
   fetchProductos,
   registrarCompra,
+  formatCOP,
+  parseCOPInput,
   type ProductoDTO,
   type VarianteDTO,
 } from '../../lib/api';
@@ -243,7 +245,7 @@ export function RegistrarCompraModal({ isOpen, onClose, onSuccess }: Props) {
                               </span>
                               {v.costo != null && (
                                 <span className="text-gray-500 ml-2">
-                                  ${Number(v.costo).toFixed(2)}
+                                  {formatCOP(v.costo)}
                                 </span>
                               )}
                             </button>
@@ -299,18 +301,18 @@ export function RegistrarCompraModal({ isOpen, onClose, onSuccess }: Props) {
                         </td>
                         <td className="py-2">
                           <input
-                            type="number"
-                            value={item.costoUnitario}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9.]*"
+                            value={item.costoUnitario || ''}
                             onChange={(e) =>
-                              updateCostoUnitario(i, Number(e.target.value))
+                              updateCostoUnitario(i, parseCOPInput(e.target.value))
                             }
-                            min="0"
-                            step="0.01"
                             className="w-full px-2 py-1 bg-gray-800 border border-gray-700 rounded text-white text-right text-sm focus:outline-none focus:border-purple-500"
                           />
                         </td>
                         <td className="py-2 text-right text-sm">
-                          ${(item.cantidad * item.costoUnitario).toFixed(2)}
+                          {formatCOP(item.cantidad * item.costoUnitario)}
                         </td>
                         <td className="py-2 text-center">
                           <button
@@ -342,7 +344,7 @@ export function RegistrarCompraModal({ isOpen, onClose, onSuccess }: Props) {
             <div className="flex justify-end items-center gap-2 pt-2 border-t border-gray-700">
               <span className="text-gray-400 text-sm">Total:</span>
               <span className="text-white text-xl font-bold">
-                ${total.toFixed(2)}
+                {formatCOP(total)}
               </span>
             </div>
           )}

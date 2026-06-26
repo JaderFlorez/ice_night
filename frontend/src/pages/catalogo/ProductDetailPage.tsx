@@ -5,6 +5,7 @@ import {
   fetchProducto,
   eliminarProducto,
   eliminarVariante,
+  formatCOP,
   type ProductoDTO,
 } from '../../lib/api';
 import { ProductFormModal } from '../../components/catalogo/ProductFormModal';
@@ -260,10 +261,10 @@ export function ProductDetailPage() {
                     <td className="py-3">{v.nombre}</td>
                     <td className="py-3 text-gray-400 font-mono">{v.sku}</td>
                     <td className="py-3 text-right">
-                      {v.precio != null ? `$${Number(v.precio).toFixed(2)}` : '—'}
+                      {v.precio != null ? formatCOP(v.precio) : '—'}
                     </td>
                     <td className="py-3 text-right">
-                      {v.costo != null ? `$${Number(v.costo).toFixed(2)}` : '—'}
+                      {v.costo != null ? formatCOP(v.costo) : '—'}
                     </td>
                     <td className="py-3 text-right">
                       <span

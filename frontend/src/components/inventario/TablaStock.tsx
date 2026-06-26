@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { fetchProductos, type ProductoDTO } from '../../lib/api';
+import { fetchProductos, formatCOP, type ProductoDTO } from '../../lib/api';
 
 interface VarianteRow {
   productoId: string;
@@ -228,12 +228,12 @@ export function TablaStock() {
                   </td>
                   <td className="py-2 pr-4 text-right">
                     {row.precio != null
-                      ? `$${row.precio.toLocaleString('es-AR')}`
+                      ? formatCOP(row.precio)
                       : '—'}
                   </td>
                   <td className="py-2 pr-4 text-right">
                     {row.costo != null
-                      ? `$${row.costo.toLocaleString('es-AR')}`
+                      ? formatCOP(row.costo)
                       : '—'}
                   </td>
                   <td className="py-2">

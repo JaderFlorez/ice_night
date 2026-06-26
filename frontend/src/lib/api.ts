@@ -614,3 +614,43 @@ export async function fetchHistorialVentas(
   const json = await res.json();
   return json.data;
 }
+
+// ──────────────────────────────
+// Formateo de moneda (COP)
+// ──────────────────────────────
+
+/**
+ * Formatea un número como pesos colombianos.
+ * Ejemplo: formatCOP(10500) → "$ 10.500"
+ */
+export function formatCOP(value: number): string {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+/**
+ * Formatea un número para mostrar en un input (solo separador de miles, sin $).
+ * Ejemplo: formatCOPInput(1500) → "1.500"
+ */
+export function formatCOPInput(value: number): string {
+  return new Intl.NumberFormat('es-CO', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+/**
+ * Parsea un valor ingresado en formato colombiano a número.
+ * "10.000" → 10000, "500" → 500, "" → 0
+ */
+export function parseCOPInput(value: string): number {
+  if (!value) return 0;
+  // Saca los puntos de separador de miles, reemplaza coma decimal por punto
+  const cleaned = value.replace(/\./g, '').replace(',', '.');
+  const parsed = Number(cleaned);
+  return isNaN(parsed) ? 0 : parsed;
+}

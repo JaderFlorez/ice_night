@@ -3,6 +3,8 @@ import {
   crearVariante,
   actualizarVariante,
   fetchNextSku,
+  formatCOPInput,
+  parseCOPInput,
   type VarianteDTO,
   type CrearVarianteData,
   type ActualizarVarianteData,
@@ -46,8 +48,8 @@ export function VariantFormModal({
     if (variant) {
       setNombre(variant.nombre);
       setSku(variant.sku);
-      setPrecio(variant.precio != null ? String(variant.precio) : '');
-      setCosto(variant.costo != null ? String(variant.costo) : '');
+      setPrecio(variant.precio != null ? formatCOPInput(variant.precio) : '');
+      setCosto(variant.costo != null ? formatCOPInput(variant.costo) : '');
       setStock(String(variant.stock));
       setStockMinimo(String(variant.stock_minimo));
     } else {
@@ -94,8 +96,8 @@ export function VariantFormModal({
         const data: ActualizarVarianteData = {
           nombre: nombre.trim(),
           sku: sku.trim(),
-          precio: precio ? Number(precio) : undefined,
-          costo: costo ? Number(costo) : undefined,
+          precio: precio ? parseCOPInput(precio) : undefined,
+          costo: costo ? parseCOPInput(costo) : undefined,
           stock: stock ? Number(stock) : undefined,
           stock_minimo: stockMinimo ? Number(stockMinimo) : undefined,
         };
@@ -105,8 +107,8 @@ export function VariantFormModal({
         const data: CrearVarianteData = {
           nombre: nombre.trim(),
           sku: sku.trim(),
-          precio: precio ? Number(precio) : undefined,
-          costo: costo ? Number(costo) : undefined,
+          precio: precio ? parseCOPInput(precio) : undefined,
+          costo: costo ? parseCOPInput(costo) : undefined,
           stock: stock ? Number(stock) : undefined,
           stock_minimo: stockMinimo ? Number(stockMinimo) : undefined,
         };
@@ -188,23 +190,23 @@ export function VariantFormModal({
             <div>
               <label className="block text-sm text-gray-400 mb-1">Precio</label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9.]*"
                 value={precio}
                 onChange={(e) => setPrecio(e.target.value)}
-                step="0.01"
-                min="0"
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 text-sm"
-                placeholder="0.00"
+                placeholder="0"
               />
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1">Costo</label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9.]*"
                 value={costo}
                 onChange={(e) => setCosto(e.target.value)}
-                step="0.01"
-                min="0"
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 text-sm"
                 placeholder="0.00"
               />

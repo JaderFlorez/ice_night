@@ -105,8 +105,8 @@ describe('DashboardPage', () => {
       expect(screen.getByText('Total recaudado hoy')).toBeInTheDocument();
     });
 
-    // Currency: toFixed(2) format
-    expect(screen.getByText('$450000.00')).toBeInTheDocument();
+    // Currency: formatCOP format
+    expect(screen.getByText(/450\.000/)).toBeInTheDocument();
     expect(screen.getByText(/15 sesiones/)).toBeInTheDocument();
     expect(screen.getByText('Sesiones activas')).toBeInTheDocument();
     // "3" appears twice: Sesiones activas count + Mesas activas count
@@ -125,7 +125,7 @@ describe('DashboardPage', () => {
     });
 
     expect(screen.getByText('Aguila light')).toBeInTheDocument();
-    expect(screen.getByText('$87500.00')).toBeInTheDocument();
+    expect(screen.getByText(/87\.500/)).toBeInTheDocument();
   });
 
   it('shows error state when API fails', async () => {
@@ -165,7 +165,7 @@ describe('DashboardPage', () => {
     });
 
     expect(screen.getByText('8')).toBeInTheDocument();
-    expect(screen.getByText('$245000.00')).toBeInTheDocument();
+    expect(screen.getByText(/245\.000/)).toBeInTheDocument();
     expect(screen.getByText('34')).toBeInTheDocument();
   });
 

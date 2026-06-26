@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   crearProducto,
   actualizarProducto,
+  parseCOPInput,
   type ProductoDTO,
   type CrearProductoData,
   type ActualizarProductoData,
@@ -94,7 +95,7 @@ export function ProductFormModal({ isOpen, onClose, onSuccess, product }: Props)
           tiene_variantes: tieneVariantes,
         };
         if (!tieneVariantes) {
-          data.precio = precio ? Number(precio) : undefined;
+          data.precio = precio ? parseCOPInput(precio) : undefined;
           data.stock = stock ? Number(stock) : undefined;
         }
         await crearProducto(data);
@@ -202,13 +203,13 @@ export function ProductFormModal({ isOpen, onClose, onSuccess, product }: Props)
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Precio</label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9.]*"
                   value={precio}
                   onChange={(e) => setPrecio(e.target.value)}
-                  step="0.01"
-                  min="0"
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 text-sm"
-                  placeholder="0.00"
+                  placeholder="0"
                 />
               </div>
               <div>
