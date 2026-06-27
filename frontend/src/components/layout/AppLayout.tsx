@@ -3,7 +3,6 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth, useIsAdmin } from '../../context/AuthContext';
 
 const navItems = [
-  { path: '/dashboard', label: 'Dashboard', icon: '📊' },
   { path: '/mesas', label: 'Mesas', icon: '🪑' },
   { path: '/catalogo', label: 'Catálogo', icon: '📦' },
   { path: '/inventario', label: 'Inventario', icon: '📋' },
@@ -38,6 +37,22 @@ export function AppLayout() {
         </div>
 
         <nav className="px-2 space-y-1">
+          {isAdmin && (
+            <NavLink
+              to="/dashboard"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
+                  isActive
+                    ? 'bg-purple-600/20 text-purple-300'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                }`
+              }
+            >
+              <span>📊</span>
+              Dashboard
+            </NavLink>
+          )}
           {navItems.map((item) => (
             <NavLink
               key={item.path}

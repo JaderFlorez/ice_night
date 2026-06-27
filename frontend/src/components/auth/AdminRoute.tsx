@@ -6,7 +6,7 @@ export function AdminRoute({ children }: { children: ReactNode }) {
   const { perfil } = useAuth();
 
   if (perfil?.rol !== 'admin') {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/mesas" replace />;
   }
 
   return <>{children}</>;

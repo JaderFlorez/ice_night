@@ -34,7 +34,14 @@ function App() {
           {/* Protected routes */}
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
-              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <AdminRoute>
+                    <DashboardPage />
+                  </AdminRoute>
+                }
+              />
               <Route
                 path="/admin/usuarios"
                 element={

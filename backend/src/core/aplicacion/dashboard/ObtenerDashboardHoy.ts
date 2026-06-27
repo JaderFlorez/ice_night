@@ -34,8 +34,9 @@ export class ObtenerDashboardHoy {
       ),
       pool.query(
         `SELECT COUNT(*)::int AS total
-         FROM variantes
-         WHERE stock <= stock_minimo AND activa = true`,
+         FROM variantes v
+         JOIN productos p ON p.id = v.producto_id
+         WHERE v.stock <= v.stock_minimo AND v.activa = true AND p.activo = true`,
       ),
     ]);
 

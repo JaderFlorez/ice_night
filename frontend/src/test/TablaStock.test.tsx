@@ -6,6 +6,7 @@ import type { ProductoDTO } from '../lib/api';
 
 // ─── Mutable targets for api mocks ───
 let _mockFetchProductos: () => Promise<ProductoDTO[]>;
+let _mockIsAdmin: boolean = true;
 
 vi.mock('../lib/api', async () => {
   const actual = await vi.importActual<typeof import('../lib/api')>(
@@ -16,6 +17,18 @@ vi.mock('../lib/api', async () => {
     fetchProductos: () => _mockFetchProductos(),
   };
 });
+
+vi.mock('../context/AuthContext', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+  useAuth: () => ({
+    session: { access_token: 'mock-token', user: { id: 'user-1' } },
+    perfil: { id: 'user-1', email: 'admin@icenight.com', nombre: 'Admin', rol: 'admin', estado: 'activo', created_at: '2025-01-01T00:00:00Z' },
+    loading: false,
+    signOut: vi.fn().mockResolvedValue(undefined),
+  }),
+  useIsAdmin: () => _mockIsAdmin,
+  useRol: () => _mockIsAdmin ? 'admin' : 'mesero',
+}));
 
 const mockProductos: ProductoDTO[] = [
   {
@@ -153,6 +166,7 @@ async function waitForText(text: string) {
 describe('TablaStock', () => {
   beforeEach(() => {
     _mockFetchProductos = vi.fn().mockResolvedValue(mockProductos);
+    _mockIsAdmin = true;
     vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
@@ -313,9 +327,19 @@ describe('TablaStock', () => {
     expect(screen.getByText(/3\.000/)).toBeInTheDocument();
     expect(screen.getByText(/45\.000/)).toBeInTheDocument();
 
-    // Costs formatted with $
+    // Costs formatted with $ (admin sees cost column)
     expect(screen.getByText(/\$\s*800$/)).toBeInTheDocument();
     expect(screen.getByText(/1\.800/)).toBeInTheDocument();
+  });
+
+  it('hides cost column for meseros', async () => {
+    _mockIsAdmin = false;
+    renderWithProviders(<TablaStock />);
+
+    await waitForText('Aguila light');
+
+    // Costo header should NOT be present
+    expect(screen.queryByText('Costo')).not.toBeInTheDocument();
   });
 
   it('renders category badges', async () => {

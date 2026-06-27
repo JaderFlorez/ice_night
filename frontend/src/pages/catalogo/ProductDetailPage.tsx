@@ -243,7 +243,9 @@ export function ProductDetailPage() {
                   <th className="pb-3 font-medium">Nombre</th>
                   <th className="pb-3 font-medium">SKU</th>
                   <th className="pb-3 font-medium text-right">Precio</th>
-                  <th className="pb-3 font-medium text-right">Costo</th>
+                  {isAdmin && (
+                    <th className="pb-3 font-medium text-right">Costo</th>
+                  )}
                   <th className="pb-3 font-medium text-right">Stock</th>
                   <th className="pb-3 font-medium text-right">Stock mín.</th>
                   <th className="pb-3 font-medium">Estado</th>
@@ -263,9 +265,11 @@ export function ProductDetailPage() {
                     <td className="py-3 text-right">
                       {v.precio != null ? formatCOP(v.precio) : '—'}
                     </td>
-                    <td className="py-3 text-right">
-                      {v.costo != null ? formatCOP(v.costo) : '—'}
-                    </td>
+                    {isAdmin && (
+                      <td className="py-3 text-right">
+                        {v.costo != null ? formatCOP(v.costo) : '—'}
+                      </td>
+                    )}
                     <td className="py-3 text-right">
                       <span
                         className={

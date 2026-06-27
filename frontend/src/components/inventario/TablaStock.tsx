@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { fetchProductos, formatCOP, type ProductoDTO } from '../../lib/api';
+import { useIsAdmin } from '../../context/AuthContext';
 
 interface VarianteRow {
   productoId: string;
@@ -70,6 +71,8 @@ function computeRows(
 }
 
 export function TablaStock() {
+  const isAdmin = useIsAdmin();
+
   const [productos, setProductos] = useState<ProductoDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -194,7 +197,9 @@ export function TablaStock() {
                   Stock Mín
                 </th>
                 <th className="pb-2 pr-4 font-medium text-right">Precio</th>
-                <th className="pb-2 pr-4 font-medium text-right">Costo</th>
+                {isAdmin && (
+                  <th className="pb-2 pr-4 font-medium text-right">Costo</th>
+                )}
                 <th className="pb-2 font-medium">Categoría</th>
               </tr>
             </thead>
@@ -225,11 +230,13 @@ export function TablaStock() {
                       ? formatCOP(row.precio)
                       : '—'}
                   </td>
-                  <td className="py-2 pr-4 text-right">
-                    {row.costo != null
-                      ? formatCOP(row.costo)
-                      : '—'}
-                  </td>
+                  {isAdmin && (
+                    <td className="py-2 pr-4 text-right">
+                      {row.costo != null
+                        ? formatCOP(row.costo)
+                        : '—'}
+                    </td>
+                  )}
                   <td className="py-2">
                     <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
                       {row.categoriaLabel}
