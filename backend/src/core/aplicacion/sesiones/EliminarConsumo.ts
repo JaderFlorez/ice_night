@@ -1,11 +1,5 @@
-import {
-  SesionRepositorio,
-  ItemSesionRepositorio,
-} from '../../dominio/repositorios.js';
-import {
-  SesionNoEncontrada,
-  SesionYaCerrada,
-} from '../../dominio/errores.js';
+import { ItemSesionRepositorio, SesionRepositorio } from '../../dominio/repositorios.js';
+import { SesionNoEncontrada, SesionYaCerrada } from '../../dominio/errores.js';
 
 export class EliminarConsumo {
   constructor(
@@ -20,6 +14,11 @@ export class EliminarConsumo {
     }
     if (sesion.estado === 'cerrada') {
       throw new SesionYaCerrada();
+    }
+
+    const item = await this.itemRepo.findById(itemId);
+    if (!item || item.sesion_id !== sesionId) {
+      throw new Error('Consumo no encontrado');
     }
 
     await this.itemRepo.delete(itemId);

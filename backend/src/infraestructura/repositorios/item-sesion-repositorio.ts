@@ -7,6 +7,7 @@ function mapearItem(row: Record<string, unknown>): ItemSesion {
     id: row.id as string,
     sesion_id: row.sesion_id as string,
     variante_id: row.variante_id as string,
+    variante_nombre: (row.variante_nombre as string) ?? row.variante_id as string,
     cantidad: row.cantidad as number,
     precio_unitario: Number(row.precio_unitario),
     subtotal: Number(row.subtotal),
@@ -15,10 +16,27 @@ function mapearItem(row: Record<string, unknown>): ItemSesion {
 }
 
 export class ItemSesionRepositorioImpl implements ItemSesionRepositorio {
+  async findById(id: string): Promise<ItemSesion | null> {
+    const pool = getPool();
+    const result = await pool.query(
+      `SELECT i.*, CONCAT(p.nombre, ' — ', v.nombre) AS variante_nombre
+       FROM items_sesion i
+       JOIN variantes v ON v.id = i.variante_id
+       JOIN productos p ON p.id = v.producto_id
+       WHERE i.id = $1`,
+      [id],
+    );
+    return result.rows.length > 0 ? mapearItem(result.rows[0]) : null;
+  }
+
   async findBySesion(sesionId: string): Promise<ItemSesion[]> {
     const pool = getPool();
     const result = await pool.query(
-      'SELECT * FROM items_sesion WHERE sesion_id = $1 ORDER BY creado_en',
+      `SELECT i.*, CONCAT(p.nombre, ' — ', v.nombre) AS variante_nombre
+       FROM items_sesion i
+       JOIN variantes v ON v.id = i.variante_id
+       JOIN productos p ON p.id = v.producto_id
+       WHERE i.sesion_id = $1 ORDER BY i.creado_en`,
       [sesionId],
     );
     return result.rows.map(mapearItem);

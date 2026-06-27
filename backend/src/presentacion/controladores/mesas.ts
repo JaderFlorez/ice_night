@@ -19,11 +19,18 @@ const actualizarMesa = new ActualizarMesa(mesaRepo);
 const eliminarMesa = new EliminarMesa(mesaRepo);
 
 export async function listarMesasHandler(
-  _request: FastifyRequest,
+  request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const mesas = await listarMesas.ejecutar();
-  return reply.send({ data: mesas });
+  try {
+    const mesas = await listarMesas.ejecutar();
+    return reply.send({ data: mesas });
+  } catch (error) {
+    request.log.error(error, 'Error en listarMesasHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error al listar mesas',
+    });
+  }
 }
 
 export async function crearMesaHandler(
@@ -47,7 +54,10 @@ export async function crearMesaHandler(
     if (error instanceof ErrorDeDominio) {
       return reply.status(409).send({ error: error.message });
     }
-    throw error;
+    request.log.error(error, 'Error en crearMesaHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error al crear mesa',
+    });
   }
 }
 
@@ -76,7 +86,10 @@ export async function actualizarMesaHandler(
     if (error instanceof ErrorDeDominio) {
       return reply.status(409).send({ error: error.message });
     }
-    throw error;
+    request.log.error(error, 'Error en actualizarMesaHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error al actualizar mesa',
+    });
   }
 }
 
@@ -92,6 +105,9 @@ export async function eliminarMesaHandler(
     if (error instanceof MesaNoEncontrada) {
       return reply.status(404).send({ error: error.message });
     }
-    throw error;
+    request.log.error(error, 'Error en eliminarMesaHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error al eliminar mesa',
+    });
   }
 }

@@ -60,7 +60,10 @@ export async function obtenerCompraHandler(
     if (error instanceof CompraNoEncontrada) {
       return reply.status(404).send({ error: error.message });
     }
-    throw error;
+    request.log.error(error, 'Error en obtenerCompraHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error al obtener compra',
+    });
   }
 }
 
@@ -79,7 +82,10 @@ export async function registrarCompraHandler(
         detalles: error.errors.map((e) => e.message),
       });
     }
-    throw error;
+    request.log.error(error, 'Error en registrarCompraHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error al registrar compra',
+    });
   }
 }
 

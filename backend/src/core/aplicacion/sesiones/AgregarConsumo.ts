@@ -44,6 +44,7 @@ export class AgregarConsumo {
       id: crypto.randomUUID(),
       sesion_id: sesionId,
       variante_id: varianteId,
+      variante_nombre: variante.nombre,
       cantidad,
       precio_unitario,
       subtotal,

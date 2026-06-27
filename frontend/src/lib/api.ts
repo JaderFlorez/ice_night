@@ -286,6 +286,7 @@ export interface ItemSesionDTO {
   id: string;
   sesion_id: string;
   variante_id: string;
+  variante_nombre: string;
   cantidad: number;
   precio_unitario: number;
   subtotal: number;
@@ -362,6 +363,7 @@ export async function abrirSesion(mesaId: string): Promise<SesionDTO> {
   const res = await fetch(`${API_BASE}/mesas/${mesaId}/abrir`, {
     method: 'POST',
     headers,
+    body: JSON.stringify({}),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Error al abrir sesión' }));

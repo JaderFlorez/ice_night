@@ -7,6 +7,7 @@ import {
   obtenerSesionHandler,
   listarSesionesActivasHandler,
   agregarConsumoHandler,
+  eliminarConsumoHandler,
   obtenerCuentaHandler,
 } from '../controladores/sesiones.js';
 
@@ -36,6 +37,12 @@ export async function registrarRutasSesiones(app: FastifyInstance) {
     '/api/sesiones/:id/items',
     { preHandler: auth },
     agregarConsumoHandler,
+  );
+
+  app.delete(
+    '/api/sesiones/:sesionId/items/:itemId',
+    { preHandler: auth },
+    eliminarConsumoHandler,
   );
 
   app.get(

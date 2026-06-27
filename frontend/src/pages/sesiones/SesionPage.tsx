@@ -6,6 +6,7 @@ import {
   fetchSesion,
   obtenerCuenta,
   agregarConsumo,
+  eliminarConsumo,
   fetchProductos,
   formatCOP,
   type MesaDTO,
@@ -366,6 +367,7 @@ export function SesionPage() {
                   <th className="pb-3 font-medium text-right">Cant.</th>
                   <th className="pb-3 font-medium text-right">Precio U.</th>
                   <th className="pb-3 font-medium text-right">Subtotal</th>
+                  {isAbierta && <th className="pb-3 font-medium text-right">Acción</th>}
                 </tr>
               </thead>
               <tbody>
@@ -374,7 +376,7 @@ export function SesionPage() {
                     key={item.id}
                     className="text-white text-sm border-b border-gray-700/50"
                   >
-                    <td className="py-3">{item.variante_id}</td>
+                    <td className="py-3">{item.variante_nombre ?? item.variante_id}</td>
                     <td className="py-3 text-right">{item.cantidad}</td>
                     <td className="py-3 text-right">
                       {formatCOP(item.precio_unitario)}
@@ -382,6 +384,26 @@ export function SesionPage() {
                     <td className="py-3 text-right">
                       {formatCOP(item.subtotal)}
                     </td>
+                    {isAbierta && (
+                      <td className="py-3 text-right">
+                        <button
+                          onClick={async () => {
+                            if (!sesion) return;
+                            try {
+                              setError('');
+                              await eliminarConsumo(sesion.id, item.id);
+                              const nuevaCuenta = await obtenerCuenta(sesion.id);
+                              setCuenta(nuevaCuenta);
+                            } catch (err) {
+                              setError(err instanceof Error ? err.message : 'Error al eliminar consumo');
+                            }
+                          }}
+                          className="text-red-400 hover:text-red-300 text-xs"
+                        >
+                          Eliminar
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

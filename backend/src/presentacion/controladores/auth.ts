@@ -22,7 +22,10 @@ export async function perfilHandler(
     if (error instanceof UsuarioNoEncontrado) {
       return reply.status(404).send({ error: 'Perfil no encontrado' });
     }
-    throw error;
+    request.log.error(error, 'Error en perfilHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error interno del servidor',
+    });
   }
 }
 
@@ -52,6 +55,9 @@ export async function aprobarUsuarioHandler(
     if (error instanceof UsuarioNoEncontrado) {
       return reply.status(404).send({ error: 'Usuario no encontrado' });
     }
-    throw error;
+    request.log.error(error, 'Error en aprobarUsuarioHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error interno del servidor',
+    });
   }
 }

@@ -18,6 +18,7 @@ export interface ItemSesion {
   id: string;
   sesion_id: string;
   variante_id: string;
+  variante_nombre: string;
   cantidad: number;
   precio_unitario: number;
   subtotal: number;

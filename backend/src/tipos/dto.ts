@@ -18,7 +18,7 @@ export type LoginDTO = z.infer<typeof LoginSchema>;
 export const CrearProductoSchema = z.object({
   nombre: z.string().min(1, 'Nombre requerido'),
   descripcion: z.string().optional(),
-  categoria: z.enum(['cerveza', 'michelada', 'soda', 'snack', 'otro']),
+  categoria: z.enum(['cerveza', 'vino', 'licor', 'whisky', 'vodka', 'ron', 'gin', 'energizante', 'gaseosa', 'agua', 'snack', 'otro']),
   tiene_variantes: z.boolean().default(false),
   precio: z.number().positive('Precio debe ser positivo').optional(),
   stock: z.number().int().min(0).default(0).optional(),
@@ -29,7 +29,6 @@ export const ActualizarProductoSchema = CrearProductoSchema.partial();
 export type ActualizarProductoDTO = z.infer<typeof ActualizarProductoSchema>;
 
 export const CrearVarianteSchema = z.object({
-  producto_id: z.string().uuid(),
   nombre: z.string().min(1, 'Nombre requerido'),
   sku: z.string().min(1, 'SKU requerido'),
   precio: z.number().positive('Precio debe ser positivo'),
@@ -39,7 +38,7 @@ export const CrearVarianteSchema = z.object({
 });
 export type CrearVarianteDTO = z.infer<typeof CrearVarianteSchema>;
 
-export const ActualizarVarianteSchema = CrearVarianteSchema.omit({ producto_id: true }).partial();
+export const ActualizarVarianteSchema = CrearVarianteSchema.partial();
 export type ActualizarVarianteDTO = z.infer<typeof ActualizarVarianteSchema>;
 
 // ─── Mesas ───

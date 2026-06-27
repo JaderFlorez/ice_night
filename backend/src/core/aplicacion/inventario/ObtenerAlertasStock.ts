@@ -17,7 +17,7 @@ export class ObtenerAlertasStock {
               p.nombre AS producto_nombre, v.stock, v.stock_minimo
        FROM variantes v
        JOIN productos p ON p.id = v.producto_id
-       WHERE v.stock <= v.stock_minimo AND v.activa = true
+       WHERE v.stock <= v.stock_minimo AND v.activa = true AND p.activo = true
        ORDER BY v.stock::numeric / NULLIF(v.stock_minimo::numeric, 0) ASC`,
     );
 

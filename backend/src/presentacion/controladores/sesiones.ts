@@ -10,6 +10,7 @@ import { AbrirSesion } from '../../core/aplicacion/sesiones/AbrirSesion.js';
 import { ObtenerSesion } from '../../core/aplicacion/sesiones/ObtenerSesion.js';
 import { ListarSesionesActivas } from '../../core/aplicacion/sesiones/ListarSesionesActivas.js';
 import { AgregarConsumo } from '../../core/aplicacion/sesiones/AgregarConsumo.js';
+import { EliminarConsumo } from '../../core/aplicacion/sesiones/EliminarConsumo.js';
 import { ObtenerCuenta } from '../../core/aplicacion/sesiones/ObtenerCuenta.js';
 import { CerrarSesion } from '../../core/aplicacion/sesiones/CerrarSesion.js';
 import { AgregarItemSchema, CerrarSesionSchema } from '../../tipos/dto.js';
@@ -35,6 +36,7 @@ const abrirSesion = new AbrirSesion(mesaRepo, sesionRepo);
 const obtenerSesion = new ObtenerSesion(sesionRepo);
 const listarSesionesActivas = new ListarSesionesActivas(sesionRepo);
 const agregarConsumo = new AgregarConsumo(varianteRepo, sesionRepo, itemRepo);
+const eliminarConsumo = new EliminarConsumo(sesionRepo, itemRepo);
 const obtenerCuenta = new ObtenerCuenta(sesionRepo, itemRepo);
 
 // Pool-dependent use case — lazy init
@@ -71,7 +73,10 @@ export async function abrirSesionHandler(
     if (error instanceof MesaOcupada) {
       return reply.status(409).send({ error: error.message });
     }
-    throw error;
+    request.log.error(error, 'Error en abrirSesionHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error al abrir sesión',
+    });
   }
 }
 
@@ -100,7 +105,10 @@ export async function cerrarSesionHandler(
     if (error instanceof StockInsuficiente) {
       return reply.status(409).send({ error: error.message });
     }
-    throw error;
+    request.log.error(error, 'Error en cerrarSesionHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error al cerrar sesión',
+    });
   }
 }
 
@@ -116,16 +124,26 @@ export async function obtenerSesionHandler(
     if (error instanceof SesionNoEncontrada) {
       return reply.status(404).send({ error: error.message });
     }
-    throw error;
+    request.log.error(error, 'Error en obtenerSesionHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error al obtener sesión',
+    });
   }
 }
 
 export async function listarSesionesActivasHandler(
-  _request: FastifyRequest,
+  request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const sesiones = await listarSesionesActivas.ejecutar();
-  return reply.send({ data: sesiones });
+  try {
+    const sesiones = await listarSesionesActivas.ejecutar();
+    return reply.send({ data: sesiones });
+  } catch (error) {
+    request.log.error(error, 'Error en listarSesionesActivasHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error al listar sesiones',
+    });
+  }
 }
 
 export async function agregarConsumoHandler(
@@ -157,7 +175,38 @@ export async function agregarConsumoHandler(
     if (error instanceof VarianteNoEncontrada) {
       return reply.status(404).send({ error: error.message });
     }
-    throw error;
+    request.log.error(error, 'Error en agregarConsumoHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error al agregar consumo',
+    });
+  }
+}
+
+export async function eliminarConsumoHandler(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const { sesionId, itemId } = request.params as {
+    sesionId: string;
+    itemId: string;
+  };
+  try {
+    await eliminarConsumo.ejecutar(sesionId, itemId);
+    return reply.send({ mensaje: 'Consumo eliminado correctamente' });
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Consumo no encontrado') {
+      return reply.status(404).send({ error: error.message });
+    }
+    if (error instanceof SesionNoEncontrada) {
+      return reply.status(404).send({ error: error.message });
+    }
+    if (error instanceof SesionYaCerrada) {
+      return reply.status(409).send({ error: error.message });
+    }
+    request.log.error(error, 'Error en eliminarConsumoHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error al eliminar consumo',
+    });
   }
 }
 
@@ -173,6 +222,9 @@ export async function obtenerCuentaHandler(
     if (error instanceof SesionNoEncontrada) {
       return reply.status(404).send({ error: error.message });
     }
-    throw error;
+    request.log.error(error, 'Error en obtenerCuentaHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error al obtener cuenta',
+    });
   }
 }

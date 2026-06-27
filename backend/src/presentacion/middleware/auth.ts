@@ -11,18 +11,25 @@ export async function authMiddleware(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const header = request.headers.authorization;
-  if (!header) {
-    return reply.status(401).send({ error: 'Token requerido' });
-  }
+  try {
+    const header = request.headers.authorization;
+    if (!header) {
+      return reply.status(401).send({ error: 'Token requerido' });
+    }
 
-  const token = header.replace('Bearer ', '');
-  const datos = await verificarToken(token);
-  if (!datos) {
-    return reply
-      .status(401)
-      .send({ error: 'Token inválido o expirado' });
-  }
+    const token = header.replace('Bearer ', '');
+    const datos = await verificarToken(token);
+    if (!datos) {
+      return reply
+        .status(401)
+        .send({ error: 'Token inválido o expirado' });
+    }
 
-  request.usuario = datos;
+    request.usuario = datos;
+  } catch (error) {
+    request.log.error(error, 'Error en authMiddleware');
+    return reply.status(500).send({
+      error: 'Error al verificar autenticación',
+    });
+  }
 }

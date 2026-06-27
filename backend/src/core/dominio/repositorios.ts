@@ -55,6 +55,7 @@ export interface SesionRepositorio {
 
 export interface ItemSesionRepositorio {
   findBySesion(sesionId: string): Promise<ItemSesion[]>;
+  findById(id: string): Promise<ItemSesion | null>;
   save(item: ItemSesion): Promise<void>;
   delete(id: string): Promise<void>;
 }
