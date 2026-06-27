@@ -14,17 +14,17 @@ El proyecto está construido bajo los principios de **Clean Architecture** (Arqu
 | **Backend** | Node.js, Fastify, TypeScript (Serverless en Vercel) |
 | **Base de Datos y Auth** | Supabase (PostgreSQL) con RLS |
 | **Validación** | Zod |
-| **Tests** | Jest + Supertest (backend), Vitest + React Testing Library (frontend) |
-| **Despliegue** | Vercel (Frontend + Backend Serverless con `@fastify/aws-lambda`) |
+| **Tests** | Jest + Supertest (backend), Vitest + React Testing Library + MSW (frontend — 69 tests) |
+| **Despliegue** | Local (Node.js), compatible con entornos serverless |
 
 ### Flujo de Arquitectura
 
 ```
-[ React + Vite (Vercel) ] ──► [ Supabase Auth ] (login/register directo)
+[ React + Vite ] ──► [ Supabase Auth ] (login/register directo)
          │
   Authorization: Bearer JWT
          ▼
-[ Fastify Serverless (Vercel) ] ──► [ Supabase DB + RLS ]
+[ Fastify API ] ──► [ Supabase DB (PostgreSQL) ]
 ```
 
 ---
@@ -53,10 +53,21 @@ El proyecto está construido bajo los principios de **Clean Architecture** (Arqu
 │       ├── context/                  # AuthProvider + hooks (useAuth, useIsAdmin)
 │       ├── components/
 │       │   ├── auth/                 # Route guards (PublicRoute, ProtectedRoute, AdminRoute)
-│       │   └── layout/               # AppLayout (sidebar responsive + header)
+│       │   ├── layout/               # AppLayout (sidebar responsive + header)
+│       │   ├── catalogo/             # ProductFormModal, VariantFormModal
+│       │   ├── inventario/           # TablaStock, AlertasStock
+│       │   ├── mesas/                # MesaFormModal
+│       │   └── dashboard/            # SalesHistorySection
 │       ├── pages/
 │       │   ├── auth/                 # LoginPage, RegisterPage, PendingApprovalPage
-│       │   └── admin/                # UserManagementPage
+│       │   ├── admin/                # UserManagementPage
+│       │   ├── catalogo/             # CatalogPage, ProductDetailPage
+│       │   ├── inventario/           # InventoryPage, ComprasPage
+│       │   ├── mesas/                # MesasPage
+│       │   └── sesiones/             # AbrirSesionPage, SesionPage
+│       ├── test/                     # Tests con Vitest + MSW + Testing Library
+│       │   ├── msw/                  # MSW handlers
+│       │   └── test-utils.tsx         # Test helpers
 │       └── lib/                      # Cliente Supabase + API helpers
 ├── supabase/                         # Migraciones SQL y políticas RLS
 │   └── migrations/                   # 7 migraciones (usuarios → RLS policies + seed)
@@ -98,21 +109,21 @@ Enrutamiento base, health check, pool de conexión a Supabase, y despliegue agn�
   - `adminMiddleware` — verifica que el usuario sea administrador
 - Endpoints: `GET /api/auth/perfil`, `GET /api/admin/usuarios/pendientes`, `PATCH /api/admin/usuarios/:id/estado`
 
-### 3. Catálogo de Productos y Variantes [⏳ Próximo Módulo — Change 2]
+### 3. Catálogo de Productos y Variantes [✅ Completado]
 
-CRUD completo de productos lógicos con soporte para variantes multi-precio (ej: michelada→sabores: tamarindo, mango, clásica; cerveza→marcas: Águila, Corona, etc.).
+CRUD completo de productos con soporte para variantes multi-precio (tamaño, presentación). Creación, edición, activación/desactivación de productos y variantes. Búsqueda y filtro por categoría. SKU autogenerado por categoría.
 
-### 4. Mesas y Sesiones de Consumo [📅 Planeado]
+### 4. Mesas y Sesiones de Consumo [✅ Completado]
 
-Monitoreo del estado de las mesas (Libre, Ocupada). Apertura de sesiones vinculadas al mesero responsable bajo políticas RLS restrictivas. Cuenta acumulada con rondas y snapshot de precios.
+Gestión completa de mesas (crear, editar, eliminar). Apertura de sesiones por mesa vinculadas al mesero responsable. Agregar/quitar consumos con precios congelados al momento de agregar. Cierre de sesión con cálculo de total. Edición inline de consumo. Vista de sesiones activas por mesa.
 
-### 5. Inventario y Stock [📅 Planeado]
+### 5. Inventario y Stock [✅ Completado]
 
-Auditoría de movimientos de stock (Entradas por compras, salidas automáticas por ventas). Alertas de stock mínimo. Control de stock por variante.
+Registro de compras con múltiples items por variante. Actualización automática de stock al registrar compras. Alertas de stock mínimo con indicador visual. Tabla de stock con filtros por producto y categoría. Movimientos de stock (compra/venta). Control de stock por variante.
 
-### 6. Dashboard Administrativo [📅 Planeado]
+### 6. Dashboard Administrativo [✅ Completado]
 
-Métricas de ventas en tiempo real, productos más vendidos, ganancia bruta, y comisiones acumuladas por mesero.
+KPIs del día: total recaudado, sesiones activas, alertas de stock, mesas activas. Top 5 productos más vendidos. Historial de ventas por período (hoy, ayer, semana, mes, año, personalizado) con indicadores de utilidad bruta y margen de ganancia. Actualización automática al volver a la página.
 
 ---
 
@@ -204,8 +215,22 @@ cd frontend && npm test
 
 1. **Registrar primer usuario** en `/register` → se convierte en `admin` automáticamente
 2. **Registrar segundo usuario** → queda como `pendiente` (redirige a pantalla de espera)
-3. **Iniciar sesión como admin** → ir a Admin → aprobar al segundo usuario
-4. **Iniciar sesión como el segundo usuario** → ahora puede acceder al dashboard
+3. **Iniciar sesión como admin** → ir a 👥 Admin → aprobar al segundo usuario
+4. **Iniciar sesión como el segundo usuario** → ahora puede acceder (sin dashboard ni costos)
+5. **Crear productos** desde Catálogo → elegir categoría y variantes
+6. **Gestionar mesas** desde Mesas → crear, abrir sesión, agregar consumos
+7. **Registrar compras** desde Inventario → Compras para actualizar stock
+8. **Ver dashboard** con KPIs del día, top productos e historial de ventas
+
+### Tests
+
+```bash
+# Backend (Jest + Supertest)
+cd backend && npm test
+
+# Frontend (Vitest + Testing Library)
+cd frontend && npm test
+```
 
 ---
 

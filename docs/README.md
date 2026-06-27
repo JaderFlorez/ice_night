@@ -16,26 +16,13 @@ ERP con frontend React, backend Fastify (serverless), y Supabase Postgres + Auth
 | Arquitectura | Clean Architecture (Repository + Use Case patterns) |
 | Lenguaje de dominio | Español (entidades, errores, casos de uso) |
 
-## Documentos
-
-### Arquitectura y diseño
+## Documentos disponibles
 
 | Documento | Descripción |
 |-----------|-------------|
-| [architecture.md](architecture.md) | Arquitectura general: diagramas de flujo, capas, middleware, deploy, decisiones de diseño |
-| [openapi.yaml](openapi.yaml) | Especificación OpenAPI 3.0 de todos los endpoints del API |
-
-### Base de datos
-
-| Documento | Descripción |
-|-----------|-------------|
+| [architecture.md](architecture.md) | Arquitectura general: diagramas de flujo, capas, middleware, decisiones de diseño |
 | [database/schema.md](database/schema.md) | Schema completo: ERD, tablas, columnas, constraints, índices, triggers |
 | [database/rls-policies.md](database/rls-policies.md) | Políticas de seguridad Row Level Security por tabla y rol |
-
-### Flujos de negocio
-
-| Documento | Descripción |
-|-----------|-------------|
 | [flows/auth-flow.md](flows/auth-flow.md) | Flujo de autenticación: registro, login, aprobación de admin, route guards |
 
 ## Enlaces rápidos
