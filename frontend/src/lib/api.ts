@@ -93,6 +93,7 @@ export interface CrearProductoData {
   categoria: CategoriaProducto;
   tiene_variantes: boolean;
   precio?: number;
+  costo?: number;
   stock?: number;
 }
 
@@ -101,6 +102,7 @@ export interface ActualizarProductoData {
   descripcion?: string;
   categoria?: CategoriaProducto;
   tiene_variantes?: boolean;
+  costo?: number;
 }
 
 export interface CrearVarianteData {
@@ -438,6 +440,29 @@ export async function eliminarConsumo(sesionId: string, itemId: string): Promise
   }
 }
 
+export interface ActualizarConsumoData {
+  cantidad: number;
+}
+
+export async function actualizarConsumo(
+  sesionId: string,
+  itemId: string,
+  data: ActualizarConsumoData,
+): Promise<ItemSesionDTO> {
+  const headers = await getHeaders();
+  const res = await fetch(`${API_BASE}/sesiones/${sesionId}/items/${itemId}`, {
+    method: 'PATCH',
+    headers,
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Error al actualizar consumo' }));
+    throw new Error(err.error || 'Error al actualizar consumo');
+  }
+  const json = await res.json();
+  return json.data;
+}
+
 // ──────────────────────────────
 // Inventario — tipos
 // ──────────────────────────────
@@ -569,6 +594,8 @@ export interface HistorialVentaDetalleDTO {
   fecha: string;
   sesiones: number;
   total: number;
+  costo: number;
+  utilidad: number;
 }
 
 export interface HistorialVentasDTO {
@@ -576,6 +603,8 @@ export interface HistorialVentasDTO {
   total_sesiones: number;
   total_recaudado: number;
   productos_vendidos: number;
+  total_costos: number;
+  utilidad: number;
   desglose: HistorialVentaDetalleDTO[];
 }
 

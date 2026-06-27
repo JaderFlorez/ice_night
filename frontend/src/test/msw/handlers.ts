@@ -338,6 +338,22 @@ export const sesionesHandlers = [
     return HttpResponse.json({ data: newItem }, { status: 201 });
   }),
 
+  http.patch(`${API_BASE}/sesiones/:sesionId/items/:itemId`, async ({ request, params }) => {
+    const body = await request.json() as any;
+    return HttpResponse.json({
+      data: {
+        id: params.itemId,
+        sesion_id: params.sesionId,
+        variante_id: 'var-1',
+        variante_nombre: 'Aguila light — Botella 330ml',
+        cantidad: body.cantidad,
+        precio_unitario: 3500,
+        subtotal: body.cantidad * 3500,
+        creado_en: new Date().toISOString(),
+      },
+    });
+  }),
+
   http.delete(`${API_BASE}/sesiones/:id/items/:itemId`, () => {
     return HttpResponse.json({ mensaje: 'Consumo eliminado correctamente' });
   }),
@@ -387,10 +403,12 @@ const mockHistorialVentas: Record<string, unknown> = {
     total_sesiones: 8,
     total_recaudado: 245000,
     productos_vendidos: 34,
+    total_costos: 73500,
+    utilidad: 171500,
     desglose: [
-      { fecha: '2026-06-24 10:00:00', sesiones: 2, total: 45000 },
-      { fecha: '2026-06-24 14:00:00', sesiones: 3, total: 85000 },
-      { fecha: '2026-06-24 18:00:00', sesiones: 3, total: 115000 },
+      { fecha: '2026-06-24 10:00:00', sesiones: 2, total: 45000, costo: 13500, utilidad: 31500 },
+      { fecha: '2026-06-24 14:00:00', sesiones: 3, total: 85000, costo: 25500, utilidad: 59500 },
+      { fecha: '2026-06-24 18:00:00', sesiones: 3, total: 115000, costo: 34500, utilidad: 80500 },
     ],
   },
   week: {
@@ -398,14 +416,16 @@ const mockHistorialVentas: Record<string, unknown> = {
     total_sesiones: 45,
     total_recaudado: 1250000,
     productos_vendidos: 320,
+    total_costos: 375000,
+    utilidad: 875000,
     desglose: [
-      { fecha: '2026-06-18', sesiones: 6, total: 180000 },
-      { fecha: '2026-06-19', sesiones: 8, total: 220000 },
-      { fecha: '2026-06-20', sesiones: 10, total: 310000 },
-      { fecha: '2026-06-21', sesiones: 5, total: 140000 },
-      { fecha: '2026-06-22', sesiones: 7, total: 195000 },
-      { fecha: '2026-06-23', sesiones: 4, total: 105000 },
-      { fecha: '2026-06-24', sesiones: 5, total: 100000 },
+      { fecha: '2026-06-18', sesiones: 6, total: 180000, costo: 54000, utilidad: 126000 },
+      { fecha: '2026-06-19', sesiones: 8, total: 220000, costo: 66000, utilidad: 154000 },
+      { fecha: '2026-06-20', sesiones: 10, total: 310000, costo: 93000, utilidad: 217000 },
+      { fecha: '2026-06-21', sesiones: 5, total: 140000, costo: 42000, utilidad: 98000 },
+      { fecha: '2026-06-22', sesiones: 7, total: 195000, costo: 58500, utilidad: 136500 },
+      { fecha: '2026-06-23', sesiones: 4, total: 105000, costo: 31500, utilidad: 73500 },
+      { fecha: '2026-06-24', sesiones: 5, total: 100000, costo: 30000, utilidad: 70000 },
     ],
   },
   month: {
@@ -413,11 +433,13 @@ const mockHistorialVentas: Record<string, unknown> = {
     total_sesiones: 180,
     total_recaudado: 5200000,
     productos_vendidos: 1400,
+    total_costos: 1560000,
+    utilidad: 3640000,
     desglose: [
-      { fecha: '2026-06-01', sesiones: 12, total: 320000 },
-      { fecha: '2026-06-08', sesiones: 15, total: 410000 },
-      { fecha: '2026-06-15', sesiones: 10, total: 280000 },
-      { fecha: '2026-06-22', sesiones: 8, total: 210000 },
+      { fecha: '2026-06-01', sesiones: 12, total: 320000, costo: 96000, utilidad: 224000 },
+      { fecha: '2026-06-08', sesiones: 15, total: 410000, costo: 123000, utilidad: 287000 },
+      { fecha: '2026-06-15', sesiones: 10, total: 280000, costo: 84000, utilidad: 196000 },
+      { fecha: '2026-06-22', sesiones: 8, total: 210000, costo: 63000, utilidad: 147000 },
     ],
   },
   year: {
@@ -425,13 +447,15 @@ const mockHistorialVentas: Record<string, unknown> = {
     total_sesiones: 2100,
     total_recaudado: 58000000,
     productos_vendidos: 16800,
+    total_costos: 17400000,
+    utilidad: 40600000,
     desglose: [
-      { fecha: '2026-01', sesiones: 180, total: 4800000 },
-      { fecha: '2026-02', sesiones: 160, total: 4200000 },
-      { fecha: '2026-03', sesiones: 200, total: 5500000 },
-      { fecha: '2026-04', sesiones: 175, total: 4900000 },
-      { fecha: '2026-05', sesiones: 190, total: 5100000 },
-      { fecha: '2026-06', sesiones: 165, total: 4500000 },
+      { fecha: '2026-01', sesiones: 180, total: 4800000, costo: 1440000, utilidad: 3360000 },
+      { fecha: '2026-02', sesiones: 160, total: 4200000, costo: 1260000, utilidad: 2940000 },
+      { fecha: '2026-03', sesiones: 200, total: 5500000, costo: 1650000, utilidad: 3850000 },
+      { fecha: '2026-04', sesiones: 175, total: 4900000, costo: 1470000, utilidad: 3430000 },
+      { fecha: '2026-05', sesiones: 190, total: 5100000, costo: 1530000, utilidad: 3570000 },
+      { fecha: '2026-06', sesiones: 165, total: 4500000, costo: 1350000, utilidad: 3150000 },
     ],
   },
 };

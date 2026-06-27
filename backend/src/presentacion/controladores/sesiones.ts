@@ -13,7 +13,8 @@ import { AgregarConsumo } from '../../core/aplicacion/sesiones/AgregarConsumo.js
 import { EliminarConsumo } from '../../core/aplicacion/sesiones/EliminarConsumo.js';
 import { ObtenerCuenta } from '../../core/aplicacion/sesiones/ObtenerCuenta.js';
 import { CerrarSesion } from '../../core/aplicacion/sesiones/CerrarSesion.js';
-import { AgregarItemSchema, CerrarSesionSchema } from '../../tipos/dto.js';
+import { ActualizarConsumo } from '../../core/aplicacion/sesiones/ActualizarConsumo.js';
+import { AgregarItemSchema, CerrarSesionSchema, ActualizarItemSchema } from '../../tipos/dto.js';
 import {
   MesaNoEncontrada,
   MesaOcupada,
@@ -42,6 +43,7 @@ const obtenerCuenta = new ObtenerCuenta(sesionRepo, itemRepo);
 // Pool-dependent use case — lazy init
 let _pool: Pool | null = null;
 let _cerrarSesion: CerrarSesion | null = null;
+let _actualizarConsumo: ActualizarConsumo | null = null;
 
 function getCerrarSesionUc(): CerrarSesion {
   if (!_cerrarSesion) {
@@ -54,6 +56,13 @@ function getCerrarSesionUc(): CerrarSesion {
     );
   }
   return _cerrarSesion;
+}
+
+function getActualizarConsumoUc(): ActualizarConsumo {
+  if (!_actualizarConsumo) {
+    _actualizarConsumo = new ActualizarConsumo(sesionRepo, itemRepo);
+  }
+  return _actualizarConsumo;
 }
 
 // ─── Handlers ───
@@ -206,6 +215,51 @@ export async function eliminarConsumoHandler(
     request.log.error(error, 'Error en eliminarConsumoHandler');
     return reply.status(500).send({
       error: error instanceof Error ? error.message : 'Error al eliminar consumo',
+    });
+  }
+}
+
+export async function actualizarConsumoHandler(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const { sesionId, itemId } = request.params as {
+    sesionId: string;
+    itemId: string;
+  };
+  try {
+    const body = ActualizarItemSchema.parse(request.body);
+    const item = await getActualizarConsumoUc().ejecutar(
+      sesionId,
+      itemId,
+      body.cantidad,
+    );
+    return reply.send({ data: item });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return reply.status(400).send({
+        error: 'Datos inválidos',
+        detalles: error.errors.map((e) => e.message),
+      });
+    }
+    if (error instanceof SesionNoEncontrada) {
+      return reply.status(404).send({ error: error.message });
+    }
+    if (error instanceof SesionYaCerrada) {
+      return reply.status(409).send({ error: error.message });
+    }
+    if (error instanceof Error && error.message === 'Item no encontrado') {
+      return reply.status(404).send({ error: error.message });
+    }
+    if (
+      error instanceof Error &&
+      error.message === 'Item no pertenece a esta sesión'
+    ) {
+      return reply.status(404).send({ error: error.message });
+    }
+    request.log.error(error, 'Error en actualizarConsumoHandler');
+    return reply.status(500).send({
+      error: error instanceof Error ? error.message : 'Error al actualizar consumo',
     });
   }
 }

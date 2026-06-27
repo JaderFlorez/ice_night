@@ -7,6 +7,7 @@ import {
   obtenerCuenta,
   agregarConsumo,
   eliminarConsumo,
+  actualizarConsumo,
   fetchProductos,
   formatCOP,
   type MesaDTO,
@@ -39,6 +40,10 @@ export function SesionPage() {
   const [timer, setTimer] = useState('00:00:00');
   const [cerrada, setCerrada] = useState(false);
   const [cerrarModalOpen, setCerrarModalOpen] = useState(false);
+
+  // Edit item state
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editCantidad, setEditCantidad] = useState('');
 
   // Add item form
   const [searchQuery, setSearchQuery] = useState('');
@@ -371,41 +376,104 @@ export function SesionPage() {
                 </tr>
               </thead>
               <tbody>
-                {items.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="text-white text-sm border-b border-gray-700/50"
-                  >
-                    <td className="py-3">{item.variante_nombre ?? item.variante_id}</td>
-                    <td className="py-3 text-right">{item.cantidad}</td>
-                    <td className="py-3 text-right">
-                      {formatCOP(item.precio_unitario)}
-                    </td>
-                    <td className="py-3 text-right">
-                      {formatCOP(item.subtotal)}
-                    </td>
-                    {isAbierta && (
+                {items.map((item) => {
+                  const isEditing = editingItemId === item.id;
+                  return (
+                    <tr
+                      key={item.id}
+                      className="text-white text-sm border-b border-gray-700/50"
+                    >
+                      <td className="py-3">{item.variante_nombre ?? item.variante_id}</td>
                       <td className="py-3 text-right">
-                        <button
-                          onClick={async () => {
-                            if (!sesion) return;
-                            try {
-                              setError('');
-                              await eliminarConsumo(sesion.id, item.id);
-                              const nuevaCuenta = await obtenerCuenta(sesion.id);
-                              setCuenta(nuevaCuenta);
-                            } catch (err) {
-                              setError(err instanceof Error ? err.message : 'Error al eliminar consumo');
-                            }
-                          }}
-                          className="text-red-400 hover:text-red-300 text-xs"
-                        >
-                          Eliminar
-                        </button>
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            value={editCantidad}
+                            onChange={(e) => setEditCantidad(e.target.value)}
+                            min="1"
+                            className="w-20 px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-sm text-right focus:outline-none focus:border-purple-500"
+                          />
+                        ) : (
+                          item.cantidad
+                        )}
                       </td>
-                    )}
-                  </tr>
-                ))}
+                      <td className="py-3 text-right">
+                        {formatCOP(item.precio_unitario)}
+                      </td>
+                      <td className="py-3 text-right">
+                        {formatCOP(item.subtotal)}
+                      </td>
+                      {isAbierta && (
+                        <td className="py-3 text-right">
+                          {isEditing ? (
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={async () => {
+                                  if (!sesion) return;
+                                  const cant = Number(editCantidad);
+                                  if (isNaN(cant) || cant < 1) {
+                                    setError('La cantidad debe ser mayor a 0');
+                                    return;
+                                  }
+                                  try {
+                                    setError('');
+                                    await actualizarConsumo(sesion.id, item.id, { cantidad: cant });
+                                    const nuevaCuenta = await obtenerCuenta(sesion.id);
+                                    setCuenta(nuevaCuenta);
+                                    setEditingItemId(null);
+                                    setEditCantidad('');
+                                  } catch (err) {
+                                    setError(err instanceof Error ? err.message : 'Error al actualizar consumo');
+                                  }
+                                }}
+                                className="text-green-400 hover:text-green-300 text-xs font-medium"
+                              >
+                                Guardar
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingItemId(null);
+                                  setEditCantidad('');
+                                }}
+                                className="text-gray-400 hover:text-gray-300 text-xs"
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-end gap-3">
+                              <button
+                                onClick={() => {
+                                  setEditingItemId(item.id);
+                                  setEditCantidad(String(item.cantidad));
+                                }}
+                                className="text-purple-400 hover:text-purple-300 text-xs font-medium"
+                              >
+                                Editar
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  if (!sesion) return;
+                                  try {
+                                    setError('');
+                                    await eliminarConsumo(sesion.id, item.id);
+                                    const nuevaCuenta = await obtenerCuenta(sesion.id);
+                                    setCuenta(nuevaCuenta);
+                                  } catch (err) {
+                                    setError(err instanceof Error ? err.message : 'Error al eliminar consumo');
+                                  }
+                                }}
+                                className="text-red-400 hover:text-red-300 text-xs"
+                              >
+                                Eliminar
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

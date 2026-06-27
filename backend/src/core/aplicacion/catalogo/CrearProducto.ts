@@ -32,7 +32,7 @@ export class CrearProducto {
         nombre: 'Único',
         sku,
         precio: data.precio ?? 0,
-        costo: 0,
+        costo: data.costo ?? 0,
         stock: data.stock ?? 0,
         stock_minimo: 5,
         activa: true,

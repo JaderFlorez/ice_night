@@ -72,8 +72,8 @@ export function SalesHistorySection() {
       {/* Data loaded */}
       {!loading && !error && data && (
         <>
-          {/* KPI Summary Card */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          {/* KPI Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
             <div className="bg-gray-700/50 rounded-lg p-4">
               <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">
                 Total sesiones
@@ -88,6 +88,22 @@ export function SalesHistorySection() {
               </p>
               <p className="text-2xl font-bold text-green-400">
                 {formatCOP(data.total_recaudado)}
+              </p>
+            </div>
+            <div className="bg-gray-700/50 rounded-lg p-4">
+              <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">
+                Costo total
+              </p>
+              <p className="text-2xl font-bold text-amber-400">
+                {formatCOP(data.total_costos)}
+              </p>
+            </div>
+            <div className="bg-gray-700/50 rounded-lg p-4">
+              <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">
+                Utilidad
+              </p>
+              <p className={`text-2xl font-bold ${data.utilidad >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {formatCOP(data.utilidad)}
               </p>
             </div>
             <div className="bg-gray-700/50 rounded-lg p-4">
@@ -113,6 +129,8 @@ export function SalesHistorySection() {
                     <th className="pb-3 font-medium">Fecha</th>
                     <th className="pb-3 font-medium text-right">Sesiones</th>
                     <th className="pb-3 font-medium text-right">Total</th>
+                    <th className="pb-3 font-medium text-right">Costo</th>
+                    <th className="pb-3 font-medium text-right">Utilidad</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -125,6 +143,12 @@ export function SalesHistorySection() {
                       <td className="py-3 text-right">{d.sesiones}</td>
                       <td className="py-3 text-right">
                         {formatCOP(d.total)}
+                      </td>
+                      <td className="py-3 text-right text-amber-400">
+                        {formatCOP(d.costo)}
+                      </td>
+                      <td className={`py-3 text-right ${d.utilidad >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {formatCOP(d.utilidad)}
                       </td>
                     </tr>
                   ))}

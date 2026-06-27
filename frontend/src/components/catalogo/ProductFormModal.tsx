@@ -39,6 +39,7 @@ export function ProductFormModal({ isOpen, onClose, onSuccess, product }: Props)
   const [categoria, setCategoria] = useState<CategoriaProducto>('otro');
   const [tieneVariantes, setTieneVariantes] = useState(false);
   const [precio, setPrecio] = useState('');
+  const [costo, setCosto] = useState('');
   const [stock, setStock] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -52,6 +53,12 @@ export function ProductFormModal({ isOpen, onClose, onSuccess, product }: Props)
       setCategoria(product.categoria);
       setTieneVariantes(product.tiene_variantes);
       setPrecio('');
+      // Pre-fill costo from the solo variant if available
+      if (!product.tiene_variantes && product.variantes.length > 0) {
+        setCosto(product.variantes[0].costo != null ? String(product.variantes[0].costo) : '');
+      } else {
+        setCosto('');
+      }
       setStock('');
     } else {
       setNombre('');
@@ -59,6 +66,7 @@ export function ProductFormModal({ isOpen, onClose, onSuccess, product }: Props)
       setCategoria('otro');
       setTieneVariantes(false);
       setPrecio('');
+      setCosto('');
       setStock('');
     }
     setError('');
@@ -85,6 +93,9 @@ export function ProductFormModal({ isOpen, onClose, onSuccess, product }: Props)
           categoria,
           tiene_variantes: tieneVariantes,
         };
+        if (!tieneVariantes) {
+          data.costo = costo ? parseCOPInput(costo) : undefined;
+        }
         await actualizarProducto(product.id, data);
         setSuccess('Producto actualizado correctamente');
       } else {
@@ -96,6 +107,7 @@ export function ProductFormModal({ isOpen, onClose, onSuccess, product }: Props)
         };
         if (!tieneVariantes) {
           data.precio = precio ? parseCOPInput(precio) : undefined;
+          data.costo = costo ? parseCOPInput(costo) : undefined;
           data.stock = stock ? Number(stock) : undefined;
         }
         await crearProducto(data);
@@ -197,9 +209,9 @@ export function ProductFormModal({ isOpen, onClose, onSuccess, product }: Props)
             </button>
           </div>
 
-          {/* Precio y stock (solo si no tiene variantes) */}
+          {/* Precio, costo y stock (solo si no tiene variantes) */}
           {!tieneVariantes && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Precio</label>
                 <input
@@ -208,6 +220,18 @@ export function ProductFormModal({ isOpen, onClose, onSuccess, product }: Props)
                   pattern="[0-9.]*"
                   value={precio}
                   onChange={(e) => setPrecio(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 text-sm"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Costo unitario</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9.]*"
+                  value={costo}
+                  onChange={(e) => setCosto(e.target.value)}
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 text-sm"
                   placeholder="0"
                 />

@@ -56,9 +56,11 @@ const defaultHistorialVentas: HistorialVentasDTO = {
   total_sesiones: 8,
   total_recaudado: 245000,
   productos_vendidos: 34,
+  total_costos: 28000,
+  utilidad: 217000,
   desglose: [
-    { fecha: '2026-06-24 10:00:00', sesiones: 2, total: 45000 },
-    { fecha: '2026-06-24 14:00:00', sesiones: 3, total: 85000 },
+    { fecha: '2026-06-24 10:00:00', sesiones: 2, total: 45000, costo: 12000, utilidad: 33000 },
+    { fecha: '2026-06-24 14:00:00', sesiones: 3, total: 85000, costo: 16000, utilidad: 69000 },
   ],
 };
 

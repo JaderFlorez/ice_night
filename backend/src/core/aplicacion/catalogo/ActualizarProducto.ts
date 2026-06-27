@@ -1,4 +1,4 @@
-import { ProductoRepositorio } from '../../dominio/repositorios.js';
+import { ProductoRepositorio, VarianteRepositorio } from '../../dominio/repositorios.js';
 import { ProductoNoEncontrado } from '../../dominio/errores.js';
 import { Producto } from '../../dominio/producto.js';
 import { ActualizarProductoDTO } from '../../../tipos/dto.js';
@@ -10,7 +10,10 @@ const CAMPOS_PRODUCTO: Set<string> = new Set<ProductoKeys>([
 ]);
 
 export class ActualizarProducto {
-  constructor(private readonly productoRepo: ProductoRepositorio) {}
+  constructor(
+    private readonly productoRepo: ProductoRepositorio,
+    private readonly varianteRepo: VarianteRepositorio,
+  ) {}
 
   async ejecutar(id: string, data: ActualizarProductoDTO): Promise<void> {
     const existe = await this.productoRepo.findById(id);
@@ -26,6 +29,15 @@ export class ActualizarProducto {
 
     if (Object.keys(datosProducto).length > 0) {
       await this.productoRepo.update(id, datosProducto);
+    }
+
+    // Propagate costo to the auto-created variant if product has no variants
+    if (data.costo !== undefined && !existe.tiene_variantes) {
+      const variantes = await this.varianteRepo.findByProducto(id);
+      const unica = variantes.find((v) => v.nombre === 'Único');
+      if (unica) {
+        await this.varianteRepo.update(unica.id, { costo: data.costo });
+      }
     }
   }
 }

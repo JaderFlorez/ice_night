@@ -59,6 +59,29 @@ export class ItemSesionRepositorioImpl implements ItemSesionRepositorio {
     );
   }
 
+  async update(id: string, data: Partial<ItemSesion>): Promise<void> {
+    const pool = getPool();
+    const sets: string[] = [];
+    const values: unknown[] = [];
+    let idx = 1;
+
+    if (data.cantidad !== undefined) {
+      sets.push(`cantidad = $${idx++}`);
+      values.push(data.cantidad);
+    }
+    if (data.subtotal !== undefined) {
+      sets.push(`subtotal = $${idx++}`);
+      values.push(data.subtotal);
+    }
+
+    if (sets.length === 0) return;
+    values.push(id);
+    await pool.query(
+      `UPDATE items_sesion SET ${sets.join(', ')} WHERE id = $${idx}`,
+      values,
+    );
+  }
+
   async delete(id: string): Promise<void> {
     const pool = getPool();
     await pool.query('DELETE FROM items_sesion WHERE id = $1', [id]);

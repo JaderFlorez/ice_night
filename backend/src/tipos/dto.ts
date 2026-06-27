@@ -21,6 +21,7 @@ export const CrearProductoSchema = z.object({
   categoria: z.enum(['cerveza', 'vino', 'licor', 'whisky', 'vodka', 'ron', 'gin', 'energizante', 'gaseosa', 'agua', 'snack', 'otro']),
   tiene_variantes: z.boolean().default(false),
   precio: z.number().positive('Precio debe ser positivo').optional(),
+  costo: z.number().min(0).optional(),
   stock: z.number().int().min(0).default(0).optional(),
 });
 export type CrearProductoDTO = z.infer<typeof CrearProductoSchema>;
@@ -63,6 +64,11 @@ export const CerrarSesionSchema = z.object({
   metodo_pago: z.enum(['efectivo', 'tarjeta', 'transferencia']).optional(),
 });
 export type CerrarSesionDTO = z.infer<typeof CerrarSesionSchema>;
+
+export const ActualizarItemSchema = z.object({
+  cantidad: z.number().int().positive('Cantidad debe ser mayor a 0'),
+});
+export type ActualizarItemDTO = z.infer<typeof ActualizarItemSchema>;
 
 // ─── Compras ───
 export const ItemCompraSchema = z.object({
