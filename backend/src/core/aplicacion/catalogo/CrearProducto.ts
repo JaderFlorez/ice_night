@@ -25,7 +25,7 @@ export class CrearProducto {
 
     // If the product does NOT have variants, auto-create "Único" variant
     if (!producto.tiene_variantes) {
-      const sku = this.generarSkuInicial(data.categoria);
+      const sku = await this.generarSku(data.categoria);
       await this.varianteRepo.save({
         id: crypto.randomUUID(),
         producto_id: producto.id,
@@ -43,15 +43,27 @@ export class CrearProducto {
     return producto;
   }
 
-  private generarSkuInicial(categoria: string): string {
+  private async generarSku(categoria: string): Promise<string> {
     const prefijos: Record<string, string> = {
       cerveza: 'CER',
-      michelada: 'MIC',
-      soda: 'SOD',
+      vino: 'VIN',
+      licor: 'LIC',
+      whisky: 'WHI',
+      vodka: 'VOD',
+      ron: 'RON',
+      gin: 'GIN',
+      energizante: 'ENE',
+      gaseosa: 'GAS',
+      agua: 'AGU',
       snack: 'SNA',
       otro: 'OTR',
     };
     const prefijo = prefijos[categoria] ?? 'GEN';
-    return `${prefijo}-001`;
+    const ultimo = await this.varianteRepo.findMaxSkuByPrefix(prefijo);
+    if (!ultimo) return `${prefijo}-001`;
+
+    const numero = parseInt(ultimo.split('-')[1], 10);
+    const siguiente = numero + 1;
+    return `${prefijo}-${String(siguiente).padStart(3, '0')}`;
   }
 }

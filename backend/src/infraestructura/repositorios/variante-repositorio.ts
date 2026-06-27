@@ -77,6 +77,15 @@ export class VarianteRepositorioImpl implements VarianteRepositorio {
     );
   }
 
+  async findMaxSkuByPrefix(prefix: string): Promise<string | null> {
+    const pool = getPool();
+    const result = await pool.query(
+      'SELECT sku FROM variantes WHERE sku LIKE $1 ORDER BY sku DESC LIMIT 1',
+      [`${prefix}-%`],
+    );
+    return result.rows.length > 0 ? (result.rows[0].sku as string) : null;
+  }
+
   async updateStock(id: string, cantidad: number): Promise<void> {
     const pool = getPool();
     await pool.query(

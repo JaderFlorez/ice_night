@@ -25,6 +25,7 @@ export interface ProductoRepositorio {
 export interface VarianteRepositorio {
   findByProducto(productoId: string): Promise<Variante[]>;
   findById(id: string): Promise<Variante | null>;
+  findMaxSkuByPrefix(prefix: string): Promise<string | null>;
   save(variante: Variante): Promise<void>;
   update(id: string, data: Partial<Variante>): Promise<void>;
   updateStock(id: string, cantidad: number): Promise<void>;
