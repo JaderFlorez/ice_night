@@ -51,7 +51,7 @@ export class CrearProducto {
       whisky: 'WHI',
       vodka: 'VOD',
       ron: 'RON',
-      gin: 'GIN',
+      granizado: 'GRA',
       energizante: 'ENE',
       gaseosa: 'GAS',
       agua: 'AGU',

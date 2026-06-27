@@ -8,7 +8,6 @@ interface VarianteRow {
   categoriaLabel: string;
   varianteId: string;
   varianteNombre: string;
-  sku: string;
   stock: number;
   stockMinimo: number;
   precio: number | null;
@@ -23,7 +22,7 @@ const CATEGORIAS: { value: string; label: string }[] = [
   { value: 'whisky', label: 'Whisky' },
   { value: 'vodka', label: 'Vodka' },
   { value: 'ron', label: 'Ron' },
-  { value: 'gin', label: 'Gin' },
+  { value: 'granizado', label: 'Granizado' },
   { value: 'energizante', label: 'Energizante' },
   { value: 'gaseosa', label: 'Gaseosa' },
   { value: 'agua', label: 'Agua' },
@@ -55,7 +54,6 @@ function computeRows(
             categoriaLabel: CATEGORIA_LABELS[p.categoria] || p.categoria,
             varianteId: v.id,
             varianteNombre: v.nombre,
-            sku: v.sku,
             stock: v.stock,
             stockMinimo: v.stock_minimo,
             precio: v.precio,
@@ -191,7 +189,6 @@ export function TablaStock() {
               <tr className="text-gray-400 text-xs border-b border-gray-700">
                 <th className="pb-2 pr-4 font-medium">Producto</th>
                 <th className="pb-2 pr-4 font-medium">Variante</th>
-                <th className="pb-2 pr-4 font-medium">SKU</th>
                 <th className="pb-2 pr-4 font-medium text-right">Stock</th>
                 <th className="pb-2 pr-4 font-medium text-right">
                   Stock Mín
@@ -211,9 +208,6 @@ export function TablaStock() {
                     {row.productoNombre}
                   </td>
                   <td className="py-2 pr-4">{row.varianteNombre}</td>
-                  <td className="py-2 pr-4 text-gray-400 text-xs">
-                    {row.sku}
-                  </td>
                   <td
                     className={`py-2 pr-4 text-right font-medium ${
                       row.stock <= row.stockMinimo

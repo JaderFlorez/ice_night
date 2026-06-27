@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   crearMesa,
   actualizarMesa,
+  eliminarMesa,
   type MesaDTO,
   type CrearMesaData,
 } from '../../lib/api';
@@ -151,25 +152,52 @@ export function MesaFormModal({ isOpen, onClose, onSuccess, mesa }: Props) {
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-800 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors"
-            >
-              {submitting
-                ? 'Guardando...'
-                : isEditing
-                  ? 'Guardar cambios'
-                  : 'Crear mesa'}
-            </button>
+          <div className="flex justify-between gap-3 pt-2">
+            {isEditing ? (
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!mesa) return;
+                  if (!window.confirm('¿Eliminar esta mesa? Las sesiones asociadas no se eliminarán.')) return;
+                  try {
+                    setSubmitting(true);
+                    setError('');
+                    await eliminarMesa(mesa.id);
+                    onSuccess();
+                  } catch (err) {
+                    setError(err instanceof Error ? err.message : 'Error al eliminar mesa');
+                  } finally {
+                    setSubmitting(false);
+                  }
+                }}
+                disabled={submitting}
+                className="px-4 py-2 bg-red-700 hover:bg-red-600 disabled:bg-red-800 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors"
+              >
+                {submitting ? 'Eliminando...' : 'Eliminar mesa'}
+              </button>
+            ) : (
+              <div />
+            )}
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-800 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors"
+              >
+                {submitting
+                  ? 'Guardando...'
+                  : isEditing
+                    ? 'Guardar cambios'
+                    : 'Crear mesa'}
+              </button>
+            </div>
           </div>
         </form>
       </div>

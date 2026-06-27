@@ -183,12 +183,6 @@ describe('TablaStock', () => {
     // Inactive variant should NOT appear
     expect(screen.queryByText('Variante Inactiva')).not.toBeInTheDocument();
 
-    // SKUs
-    expect(screen.getByText('AGL-LATA')).toBeInTheDocument();
-    expect(screen.getByText('AGL-BOT')).toBeInTheDocument();
-    expect(screen.getByText('JW-BOT')).toBeInTheDocument();
-    expect(screen.getByText('COLA-LATA')).toBeInTheDocument();
-
     // 4 data rows (1 header + 4 body rows in the table)
     const rows = screen.getAllByRole('row');
     // 1 header + 4 data rows

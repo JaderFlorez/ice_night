@@ -18,7 +18,7 @@ const CATEGORIA_LABELS: Record<string, string> = {
   whisky: 'Whisky',
   vodka: 'Vodka',
   ron: 'Ron',
-  gin: 'Gin',
+  granizado: 'Granizado',
   energizante: 'Energizante',
   gaseosa: 'Gaseosa',
   agua: 'Agua',

@@ -57,7 +57,7 @@ export type CategoriaProducto =
   | 'whisky'
   | 'vodka'
   | 'ron'
-  | 'gin'
+  | 'granizado'
   | 'energizante'
   | 'gaseosa'
   | 'agua'

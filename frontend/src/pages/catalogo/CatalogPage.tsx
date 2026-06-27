@@ -16,7 +16,7 @@ const CATEGORIAS: { value: string; label: string }[] = [
   { value: 'whisky', label: 'Whisky' },
   { value: 'vodka', label: 'Vodka' },
   { value: 'ron', label: 'Ron' },
-  { value: 'gin', label: 'Gin' },
+  { value: 'granizado', label: 'Granizado' },
   { value: 'energizante', label: 'Energizante' },
   { value: 'gaseosa', label: 'Gaseosa' },
   { value: 'agua', label: 'Agua' },

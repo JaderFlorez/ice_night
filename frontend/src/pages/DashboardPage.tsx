@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth, useIsAdmin } from '../context/AuthContext';
 import {
@@ -20,11 +20,7 @@ export function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    cargarDatos();
-  }, []);
-
-  async function cargarDatos() {
+  const cargarDatos = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -41,7 +37,18 @@ export function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    cargarDatos();
+
+    // Re-fetch when user returns to the tab
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') cargarDatos();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [cargarDatos]);
 
   if (loading) {
     return (

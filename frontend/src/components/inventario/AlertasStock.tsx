@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { fetchAlertas, type AlertaStockDTO } from '../../lib/api';
 
 export function AlertasStock() {
@@ -6,11 +6,7 @@ export function AlertasStock() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    cargarAlertas();
-  }, []);
-
-  async function cargarAlertas() {
+  const cargarAlertas = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -21,7 +17,18 @@ export function AlertasStock() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    cargarAlertas();
+
+    // Re-fetch when user returns to the tab (e.g. after updating stock elsewhere)
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') cargarAlertas();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [cargarAlertas]);
 
   if (loading) {
     return (

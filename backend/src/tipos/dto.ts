@@ -18,7 +18,7 @@ export type LoginDTO = z.infer<typeof LoginSchema>;
 export const CrearProductoSchema = z.object({
   nombre: z.string().min(1, 'Nombre requerido'),
   descripcion: z.string().optional(),
-  categoria: z.enum(['cerveza', 'vino', 'licor', 'whisky', 'vodka', 'ron', 'gin', 'energizante', 'gaseosa', 'agua', 'snack', 'otro']),
+  categoria: z.enum(['cerveza', 'vino', 'licor', 'whisky', 'vodka', 'ron', 'granizado', 'energizante', 'gaseosa', 'agua', 'snack', 'otro']),
   tiene_variantes: z.boolean().default(false),
   precio: z.number().positive('Precio debe ser positivo').optional(),
   costo: z.number().min(0).optional(),
