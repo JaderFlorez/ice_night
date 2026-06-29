@@ -180,7 +180,6 @@ export async function eliminarProducto(id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/productos/${id}`, {
     method: 'DELETE',
     headers,
-    body: JSON.stringify({}),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Error al eliminar producto' }));
@@ -239,7 +238,6 @@ export async function eliminarVariante(id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/variantes/${id}`, {
     method: 'DELETE',
     headers,
-    body: JSON.stringify({}),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Error al eliminar variante' }));
@@ -351,7 +349,6 @@ export async function eliminarMesa(id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/mesas/${id}`, {
     method: 'DELETE',
     headers,
-    body: JSON.stringify({}),
   });
   if (!res.ok) throw new Error('Error al eliminar mesa');
 }
@@ -432,7 +429,6 @@ export async function eliminarConsumo(sesionId: string, itemId: string): Promise
   const res = await fetch(`${API_BASE}/sesiones/${sesionId}/items/${itemId}`, {
     method: 'DELETE',
     headers,
-    body: JSON.stringify({}),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Error al eliminar consumo' }));
