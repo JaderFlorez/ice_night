@@ -1,5 +1,6 @@
 {
-  "buildCommand": "echo 'no build needed'",
+  "buildCommand": "mkdir -p public",
+  "outputDirectory": "public",
   "functions": {
     "api/index.ts": {
       "maxDuration": 10
